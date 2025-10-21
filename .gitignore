@@ -12,3 +12,5 @@ wheels/
 test_files
 models
 results
+outputs
+weights
