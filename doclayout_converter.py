@@ -10,11 +10,27 @@ Strategy:
 
 import os
 import torch
-import fitz
 from docx import Document
 from docx.shared import Inches, Pt
 from doclayout_yolo import YOLOv10
 import io
+
+# Lazy import fitz to avoid conflicts
+def get_fitz():
+    """Lazy import PyMuPDF to avoid conflicts"""
+    try:
+        # Try the old way first (import fitz from PyMuPDF)
+        import fitz
+        return fitz
+    except:
+        try:
+            # Try importing from pymupdf package
+            from pymupdf import fitz as fz
+            return fz
+        except:
+            # Last resort - import pymupdf directly
+            import pymupdf
+            return pymupdf
 
 
 class DocLayoutYOLOConverter:
@@ -52,6 +68,9 @@ class DocLayoutYOLOConverter:
         print(f"\n{'='*80}")
         print(f"Converting: {pdf_path}")
         print(f"{'='*80}\n")
+
+        # Get fitz module
+        fitz = get_fitz()
 
         # Open PDF
         pdf_doc = fitz.open(pdf_path)
@@ -121,6 +140,9 @@ class DocLayoutYOLOConverter:
         Returns:
             list: Detected regions with type, bbox, confidence
         """
+        # Get fitz module for Matrix
+        fitz = get_fitz()
+
         # Convert PDF page to image
         mat = fitz.Matrix(dpi / 72, dpi / 72)
         pix = page.get_pixmap(matrix=mat)
@@ -199,6 +221,9 @@ class DocLayoutYOLOConverter:
             docx_doc: Document object
             quality: Image quality multiplier
         """
+        # Get fitz module
+        fitz = get_fitz()
+
         # Create rect from bbox
         rect = fitz.Rect(bbox)
 
@@ -238,6 +263,9 @@ class DocLayoutYOLOConverter:
             docx_doc: Document object
             region_type: Type of text region
         """
+        # Get fitz module
+        fitz = get_fitz()
+
         # Extract text from region
         rect = fitz.Rect(bbox)
         text = page.get_text("text", clip=rect).strip()

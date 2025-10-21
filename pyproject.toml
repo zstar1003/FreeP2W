@@ -19,6 +19,7 @@ dependencies = [
     "psutil>=7.1.1",
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
+    "pymupdf>=1.26.5",
 ]
 
 [tool.uv.sources]
