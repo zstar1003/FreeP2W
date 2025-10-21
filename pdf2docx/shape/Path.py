@@ -254,7 +254,13 @@ class Path:
 
             # update bbox: note iso-oriented line segments -> S.bbox.get_area()==0
             rect = S.bbox
-            if rect.get_area()==0: rect += (-w, -w, w, w)
+            # Handle both old and new PyMuPDF versions
+            try:
+                area = rect.get_area()
+            except AttributeError:
+                area = rect.width * rect.height if hasattr(rect, 'width') else abs((rect.x1 - rect.x0) * (rect.y1 - rect.y0))
+
+            if area ==0: rect += (-w, -w, w, w)
             self.bbox |= rect
 
 
