@@ -199,16 +199,42 @@ class HybridConverter:
     def _inject_yolo_to_pdf2docx(self, pdf_path):
         """
         Inject YOLO detected regions into pdf2docx's image extraction
+        Also filter out shapes that overlap with YOLO detected regions
 
         This modifies pdf2docx's internal image extraction to use YOLO results
         """
         # Monkey-patch pdf2docx's ImagesExtractor
         from pdf2docx.image.ImagesExtractor import ImagesExtractor
+        from pdf2docx.shape.Paths import Paths
+        from pdf2docx.shape.Shapes import Shapes
 
-        # Save original extract_images method
+        # Save original methods
         original_extract_images = ImagesExtractor.extract_images
+        original_paths_restore = Paths.restore
+        original_shapes_restore = Shapes.restore
+        original_to_shapes_and_images = Paths.to_shapes_and_images
 
         yolo_detector = self.yolo_detector
+
+        def _rect_overlap_ratio(rect1, rect2):
+            """Calculate overlap ratio between two rectangles"""
+            # Convert to fitz.Rect if needed
+            r1 = fitz.Rect(rect1) if not isinstance(rect1, fitz.Rect) else rect1
+            r2 = fitz.Rect(rect2) if not isinstance(rect2, fitz.Rect) else rect2
+
+            # Get intersection
+            intersection = r1 & r2
+            if intersection.is_empty:
+                return 0.0
+
+            # Calculate areas
+            intersection_area = intersection.width * intersection.height
+            r1_area = r1.width * r1.height
+
+            if r1_area == 0:
+                return 0.0
+
+            return intersection_area / r1_area
 
         def yolo_enhanced_extract_images(self, clip_image_res_ratio=3.0, **kwargs):
             """Enhanced image extraction using YOLO detections"""
@@ -244,14 +270,108 @@ class HybridConverter:
 
                     images.append(raw_dict)
 
-                print(f"[YOLO] Page {page_num + 1}: Using {len(images)} YOLO-detected images")
+                print(f"[YOLO] Page {page_num + 1}: Using {len(images)} YOLO-detected images from extract_images()")
                 return images
             else:
                 # Fall back to original pdf2docx image extraction
-                return original_extract_images(self, clip_image_res_ratio, **kwargs)
+                result = original_extract_images(self, clip_image_res_ratio, **kwargs)
+                if result:
+                    print(f"[Debug] Page {page_num + 1}: extract_images() returned {len(result)} images (no YOLO)")
+                return result
 
-        # Apply monkey-patch
+        def yolo_filtered_paths_restore(self, raws:list):
+            """Completely skip paths for pages with YOLO detections"""
+            # Get page number
+            page_num = getattr(self.parent, 'number', 0)
+            yolo_figures = yolo_detector.detected_regions.get(page_num, [])
+
+            # If page has YOLO detections, skip all path processing
+            if yolo_figures:
+                print(f"[Filter] Page {page_num + 1}: Disabled all path processing (using YOLO only)")
+                return self  # Return empty paths
+            else:
+                # No YOLO detections, use original method
+                return original_paths_restore(self, raws)
+
+        def yolo_filtered_shapes_restore(self, raws:list):
+            """Filter out shapes that overlap with YOLO detected regions"""
+            # Get page number
+            page_num = getattr(self.parent, 'number', 0)
+            yolo_figures = yolo_detector.detected_regions.get(page_num, [])
+
+            # If no YOLO figures, use original method
+            if not yolo_figures:
+                return original_shapes_restore(self, raws)
+
+            # Convert YOLO figures to Rect list
+            yolo_rects = [fitz.Rect(fig['bbox']) for fig in yolo_figures]
+
+            # Filter shapes
+            from pdf2docx.shape.Shape import Stroke, Fill, Hyperlink
+            self.reset()
+            rect = (0, 0, self.parent.width, self.parent.height)
+            filtered_count = 0
+
+            for raw in raws:
+                # Distinguish specified type by key like `start`, `end` and `uri` (same as original)
+                if 'start' in raw:
+                    shape = Stroke(raw)
+                elif 'uri' in raw:
+                    shape = Hyperlink(raw)
+                else:
+                    shape = Fill(raw)
+
+                # Ignore shape out of page
+                if not shape.bbox.intersects(rect):
+                    continue
+
+                # Check if shape overlaps with any YOLO region
+                overlaps = False
+                for yolo_rect in yolo_rects:
+                    overlap_ratio = _rect_overlap_ratio(shape.bbox, yolo_rect)
+                    if overlap_ratio > 0.9:  # More than 90% overlap (changed from 50%)
+                        overlaps = True
+                        filtered_count += 1
+                        break
+
+                if not overlaps:
+                    self.append(shape)
+
+            if filtered_count > 0:
+                print(f"[Filter] Page {page_num + 1}: Filtered {filtered_count} overlapping shapes")
+
+            return self
+
+        def yolo_filtered_to_shapes_and_images(self,
+                                               min_svg_gap_dx:float=15,
+                                               min_svg_gap_dy:float=15,
+                                               min_w:float=2,
+                                               min_h:float=2,
+                                               clip_image_res_ratio:float=3.0):
+            """Completely disable SVG image generation for pages with YOLO detections"""
+            # Get page number
+            page_num = getattr(self.parent, 'number', 0)
+            yolo_figures = yolo_detector.detected_regions.get(page_num, [])
+
+            # If page has YOLO detections, disable all SVG/Path image generation
+            if yolo_figures:
+                # Only generate shapes (for tables/text styles), NO images
+                iso_shapes = []
+                if self.is_iso_oriented:
+                    iso_shapes.extend(self.to_shapes())
+
+                print(f"[Filter] Page {page_num + 1}: Disabled SVG/Path image generation (using YOLO only)")
+                return iso_shapes, []  # Return empty images list
+            else:
+                # No YOLO detections, use original method
+                return original_to_shapes_and_images(
+                    self, min_svg_gap_dx, min_svg_gap_dy, min_w, min_h, clip_image_res_ratio)
+
+        # Apply monkey-patches
         ImagesExtractor.extract_images = yolo_enhanced_extract_images
+        Paths.restore = yolo_filtered_paths_restore
+        Paths.to_shapes_and_images = yolo_filtered_to_shapes_and_images
+        # Shapes.restore = yolo_filtered_shapes_restore  # Disabled: may interfere with table parsing
 
 
 def main():
