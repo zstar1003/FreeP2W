@@ -458,14 +458,20 @@ class HybridConverter:
 
                             tbl = OxmlElement('w:tbl')
 
-                            # Table properties - no borders, full width
+                            # Table properties - no borders, full text width
                             tblPr = OxmlElement('w:tblPr')
 
-                            # Table width = 100%
+                            # Table width = 100% of text width (between margins)
                             tblW = OxmlElement('w:tblW')
                             tblW.set(qn('w:type'), 'pct')
                             tblW.set(qn('w:w'), '5000')  # 100% = 5000 in pct
                             tblPr.append(tblW)
+
+                            # Table indent = 0 (align with text left margin)
+                            tblInd = OxmlElement('w:tblInd')
+                            tblInd.set(qn('w:w'), '0')
+                            tblInd.set(qn('w:type'), 'dxa')
+                            tblPr.append(tblInd)
 
                             # No borders
                             tblBorders = OxmlElement('w:tblBorders')
@@ -509,24 +515,24 @@ class HybridConverter:
                             trPr.append(trHeight)
                             tr.append(trPr)
 
-                            # Cell 1: Empty (for balance)
+                            # Cell 1: Empty (for balance) - 5%
                             tc1 = OxmlElement('w:tc')
                             tcPr1 = OxmlElement('w:tcPr')
                             tcW1 = OxmlElement('w:tcW')
                             tcW1.set(qn('w:type'), 'pct')
-                            tcW1.set(qn('w:w'), '1667')  # 33.3%
+                            tcW1.set(qn('w:w'), '250')  # 5% (5000/100*5 = 250)
                             tcPr1.append(tcW1)
                             tc1.append(tcPr1)
                             p1 = OxmlElement('w:p')
                             tc1.append(p1)
                             tr.append(tc1)
 
-                            # Cell 2: Formula (centered)
+                            # Cell 2: Formula (centered) - 80%
                             tc2 = OxmlElement('w:tc')
                             tcPr2 = OxmlElement('w:tcPr')
                             tcW2 = OxmlElement('w:tcW')
                             tcW2.set(qn('w:type'), 'pct')
-                            tcW2.set(qn('w:w'), '1667')  # 33.3%
+                            tcW2.set(qn('w:w'), '4000')  # 80% (5000/100*80 = 4000)
                             tcPr2.append(tcW2)
                             tc2.append(tcPr2)
 
@@ -542,12 +548,12 @@ class HybridConverter:
                             tc2.append(p2)
                             tr.append(tc2)
 
-                            # Cell 3: Equation number (right-aligned)
+                            # Cell 3: Equation number (right-aligned) - 15%
                             tc3 = OxmlElement('w:tc')
                             tcPr3 = OxmlElement('w:tcPr')
                             tcW3 = OxmlElement('w:tcW')
                             tcW3.set(qn('w:type'), 'pct')
-                            tcW3.set(qn('w:w'), '1666')  # 33.3%
+                            tcW3.set(qn('w:w'), '750')  # 15% (5000/100*15 = 750)
                             tcPr3.append(tcW3)
                             tc3.append(tcPr3)
 
