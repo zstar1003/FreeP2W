@@ -433,6 +433,11 @@ class HybridConverter:
                     print(f"  [Formula] Found placeholder '{placeholder_id}' at paragraph {para_idx}, replacing...")
 
                     try:
+                        # Extract text before and after the placeholder
+                        placeholder_pos = para_text.find(placeholder_id)
+                        text_before = para_text[:placeholder_pos].strip()
+                        text_after = para_text[placeholder_pos + len(placeholder_id):].strip()
+
                         # Strip MathML declaration if present
                         if mathml.startswith('<?xml'):
                             mathml = mathml[mathml.index('?>') + 2:].strip()
@@ -448,8 +453,10 @@ class HybridConverter:
                             from docx.oxml.ns import qn
                             from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-                            # Clear the paragraph
-                            para.clear()
+                            # Extract text before and after the placeholder
+                            placeholder_pos = para_text.find(placeholder_id)
+                            text_before = para_text[:placeholder_pos].strip()
+                            text_after = para_text[placeholder_pos + len(placeholder_id):].strip()
 
                             # Create a table structure in XML (1 row, 3 columns)
                             # Column 1: Empty (balance)
@@ -586,9 +593,40 @@ class HybridConverter:
                             # Add row to table
                             tbl.append(tr)
 
-                            # Replace the paragraph with this table
-                            para._element.getparent().insert(para._element.getparent().index(para._element), tbl)
-                            para._element.getparent().remove(para._element)
+                            # Now insert the table into the document
+                            parent = para._element.getparent()
+                            para_index = parent.index(para._element)
+
+                            if text_before:
+                                print(f"    [Info] Preserving text before formula: {text_before[:50]}...")
+                                # Keep the paragraph with text_before
+                                para.clear()
+                                para.add_run(text_before)
+                                # Insert table after this paragraph
+                                parent.insert(para_index + 1, tbl)
+                            else:
+                                # Replace the paragraph with the table
+                                para.clear()
+                                parent.insert(para_index, tbl)
+                                parent.remove(para._element)
+
+                            # If there's text after the placeholder, add it as a new paragraph after the table
+                            if text_after:
+                                print(f"    [Info] Preserving text after formula: {text_after[:50]}...")
+                                new_para = OxmlElement('w:p')
+                                new_run = OxmlElement('w:r')
+                                new_text = OxmlElement('w:t')
+                                new_text.text = text_after
+                                new_run.append(new_text)
+                                new_para.append(new_run)
+
+                                # Insert after table
+                                if text_before:
+                                    # Table was inserted at para_index + 1, so insert text_after at para_index + 2
+                                    parent.insert(para_index + 2, new_para)
+                                else:
+                                    # Table was inserted at para_index, so insert text_after at para_index + 1
+                                    parent.insert(para_index + 1, new_para)
 
                             replaced_count += 1
                             print(f"    ✓ Replaced with: {latex[:60]}...")
