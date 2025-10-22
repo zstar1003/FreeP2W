@@ -383,65 +383,168 @@ class HybridConverter:
         # Insert formulas into DOCX
         if formula_data:
             print(f"\n[Formula] Inserting {sum(len(f) for f in formula_data.values())} formulas into DOCX...")
-            self._insert_mathml_into_docx(docx_path, formula_data)
+            self._replace_formula_placeholders(docx_path, formula_data)
             print(f"[Formula] Formulas inserted successfully\n")
 
-    def _insert_mathml_into_docx(self, docx_path, formula_data):
+    def _replace_formula_placeholders(self, docx_path, formula_data):
         """
-        Insert MathML formulas into DOCX file
+        Replace formula placeholder text with actual MathML formulas in DOCX file
 
         Args:
-            docx_path: Path to DOCX file
+            docx_path: Generated DOCX file
             formula_data: Dict of {page_num: [{'bbox': [...], 'latex': str, 'mathml': str}]}
         """
         from docx import Document
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        import re
 
         # Open document
         doc = Document(docx_path)
 
-        # For each page with formulas
-        for page_num, formulas in sorted(formula_data.items()):
-            # Find approximate location in document to insert formula
-            # Since pdf2docx converts page by page, we can estimate position
+        # Create a mapping of placeholder IDs to formula data
+        formula_map = {}
+        for page_num, formulas in formula_data.items():
+            for formula_idx, formula_info in enumerate(formulas):
+                placeholder_id = f"FORMULA_PLACEHOLDER_{page_num}_{formula_idx}"
+                formula_map[placeholder_id] = formula_info
 
-            # For now, append formulas at the end of document
-            # A more sophisticated approach would be to find the exact position based on bbox
+        print(f"[Formula] Searching for {len(formula_map)} placeholder texts in document...")
 
-            for formula_info in formulas:
-                mathml = formula_info['mathml']
-                latex = formula_info['latex']
+        replaced_count = 0
 
-                # Insert MathML as OMML (Office Math ML)
-                try:
-                    # Strip MathML declaration if present
-                    if mathml.startswith('<?xml'):
-                        mathml = mathml[mathml.index('?>') + 2:].strip()
+        # Iterate through all paragraphs
+        for para_idx, para in enumerate(doc.paragraphs):
+            para_text = para.text
 
-                    # Create OMML element from MathML (returns a math run, not paragraph)
-                    math_run = self._create_omml_from_mathml(mathml)
+            # Look for formula placeholder pattern
+            for placeholder_id, formula_info in formula_map.items():
+                if placeholder_id in para_text:
+                    mathml = formula_info['mathml']
+                    latex = formula_info['latex']
 
-                    if math_run:
-                        # Create a new paragraph and add the math run to it
-                        paragraph = doc.add_paragraph()
-                        paragraph._element.append(math_run)
-                    else:
-                        # Fallback: insert as plain text
-                        doc.add_paragraph(f"[Formula: {latex}]")
+                    print(f"  [Formula] Found placeholder '{placeholder_id}' at paragraph {para_idx}, replacing...")
 
-                except Exception as e:
-                    print(f"[Warning] Failed to insert formula: {e}")
-                    # Fallback: insert as plain text
-                    doc.add_paragraph(f"[Formula: {latex}]")
+                    try:
+                        # Strip MathML declaration if present
+                        if mathml.startswith('<?xml'):
+                            mathml = mathml[mathml.index('?>') + 2:].strip()
+
+                        # Create OMML element from MathML
+                        math_run = self._create_omml_from_mathml(mathml)
+
+                        if math_run:
+                            # Clear the paragraph content
+                            para.clear()
+
+                            # Set paragraph alignment to center
+                            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+                            # Insert the math run
+                            para._element.append(math_run)
+
+                            replaced_count += 1
+                            print(f"    ✓ Replaced with: {latex[:60]}...")
+                        else:
+                            print(f"    ✗ Failed to create OMML for: {latex[:60]}...")
+
+                    except Exception as e:
+                        print(f"    ✗ Error replacing formula: {e}")
+                        import traceback
+                        traceback.print_exc()
+
+                    break  # Move to next paragraph
+
+        print(f"[Formula] Replaced {replaced_count} out of {len(formula_map)} formulas")
+
+        if replaced_count < len(formula_map):
+            print(f"[Warning] {len(formula_map) - replaced_count} placeholders not found in document")
 
         # Save document
         doc.save(docx_path)
 
+    def _mathml_to_omml(self, mathml_elem):
+        """
+        Convert MathML element to OMML (Office Math ML) element recursively
+
+        Args:
+            mathml_elem: lxml Element with MathML
+
+        Returns:
+            OMML element as XML string
+        """
+        from lxml import etree
+
+        # Remove namespace for easier handling
+        tag = mathml_elem.tag.split('}')[-1] if '}' in mathml_elem.tag else mathml_elem.tag
+
+        # Handle different MathML elements
+        if tag == 'math':
+            # Root element - process children
+            omml_parts = []
+            for child in mathml_elem:
+                omml_parts.append(self._mathml_to_omml(child))
+            return ''.join(omml_parts)
+
+        elif tag == 'mrow':
+            # Group - just process children
+            omml_parts = []
+            for child in mathml_elem:
+                omml_parts.append(self._mathml_to_omml(child))
+            return ''.join(omml_parts)
+
+        elif tag == 'msup':
+            # Superscript: base^superscript
+            children = list(mathml_elem)
+            if len(children) >= 2:
+                base = self._mathml_to_omml(children[0])
+                sup = self._mathml_to_omml(children[1])
+                return f'<m:sSup><m:e>{base}</m:e><m:sup>{sup}</m:sup></m:sSup>'
+            return ''
+
+        elif tag == 'msub':
+            # Subscript: base_subscript
+            children = list(mathml_elem)
+            if len(children) >= 2:
+                base = self._mathml_to_omml(children[0])
+                sub = self._mathml_to_omml(children[1])
+                return f'<m:sSub><m:e>{base}</m:e><m:sub>{sub}</m:sub></m:sSub>'
+            return ''
+
+        elif tag == 'msubsup':
+            # Subscript and superscript: base_sub^sup
+            children = list(mathml_elem)
+            if len(children) >= 3:
+                base = self._mathml_to_omml(children[0])
+                sub = self._mathml_to_omml(children[1])
+                sup = self._mathml_to_omml(children[2])
+                return f'<m:sSubSup><m:e>{base}</m:e><m:sub>{sub}</m:sub><m:sup>{sup}</m:sup></m:sSubSup>'
+            return ''
+
+        elif tag == 'mfrac':
+            # Fraction: numerator/denominator
+            children = list(mathml_elem)
+            if len(children) >= 2:
+                num = self._mathml_to_omml(children[0])
+                den = self._mathml_to_omml(children[1])
+                return f'<m:f><m:num>{num}</m:num><m:den>{den}</m:den></m:f>'
+            return ''
+
+        elif tag in ['mi', 'mn', 'mo', 'mtext']:
+            # Text elements: identifier, number, operator, text
+            text = mathml_elem.text or ''
+            # Escape XML special characters
+            text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            return f'<m:r><m:t>{text}</m:t></m:r>'
+
+        else:
+            # Unknown element - just process children and extract text
+            text = ''.join(mathml_elem.itertext())
+            text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            return f'<m:r><m:t>{text}</m:t></m:r>'
+
     def _create_omml_from_mathml(self, mathml):
         """
         Create OMML (Office Math ML) run element from MathML
-
-        Note: This is a simplified conversion that creates a basic OMML structure.
-        For full MathML→OMML conversion, consider using an XSLT transform.
 
         Args:
             mathml: MathML string
@@ -456,22 +559,15 @@ class HybridConverter:
             # Parse the MathML
             mathml_tree = etree.fromstring(mathml.encode('utf-8'))
 
-            # Extract the formula content (simplified approach)
-            # Get text content from MathML for basic display
-            formula_text = ''.join(mathml_tree.itertext())
+            # Convert MathML to OMML
+            omml_content = self._mathml_to_omml(mathml_tree)
 
             # Create OMML run with math zone
-            # This creates a proper Word math run structure
             omml_xml = f'''
             <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
                  xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">
                 <m:oMath>
-                    <m:r>
-                        <w:rPr>
-                            <w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/>
-                        </w:rPr>
-                        <m:t>{formula_text}</m:t>
-                    </m:r>
+                    {omml_content}
                 </m:oMath>
             </w:r>
             '''
@@ -528,18 +624,20 @@ class HybridConverter:
             return intersection_area / r1_area
 
         def yolo_enhanced_extract_images(self, clip_image_res_ratio=3.0, **kwargs):
-            """Enhanced image extraction using YOLO detections"""
+            """Enhanced image extraction using YOLO detections (figures only)"""
 
             page = self._page
             page_num = page.number
 
-            # Get YOLO detected figures for this page
+            # Get YOLO detected regions for this page
             regions = yolo_detector.detected_regions.get(page_num, {})
             yolo_figures = regions.get('figures', [])
 
             if yolo_figures:
-                # Use YOLO detections
+                # Use YOLO detections for figures only
                 images = []
+
+                # Add figures
                 for fig in yolo_figures:
                     bbox = fig['bbox']
                     rect = fitz.Rect(bbox)
@@ -562,7 +660,7 @@ class HybridConverter:
 
                     images.append(raw_dict)
 
-                print(f"[YOLO] Page {page_num + 1}: Using {len(images)} YOLO-detected images from extract_images()")
+                print(f"[YOLO] Page {page_num + 1}: Using {len(yolo_figures)} YOLO-detected figures")
                 return images
             else:
                 # Fall back to original pdf2docx image extraction
@@ -572,7 +670,7 @@ class HybridConverter:
                 return result
 
         def yolo_filtered_preprocess_text(self, **settings):
-            """Filter out text blocks that overlap with YOLO detected regions"""
+            """Filter out text blocks that overlap with YOLO regions, but insert formula placeholders"""
             # Get page number
             page_num = self.page_engine.number
             regions = yolo_detector.detected_regions.get(page_num, {})
@@ -586,11 +684,10 @@ class HybridConverter:
             if not yolo_figures and not yolo_formulas:
                 return text_blocks
 
-            # Convert YOLO regions to Rect list (both figures and formulas)
+            # Convert YOLO figure regions to Rect list (NOT formulas - we want to keep formula text areas)
             yolo_rects = [fitz.Rect(fig['bbox']) for fig in yolo_figures]
-            yolo_rects.extend([fitz.Rect(formula['bbox']) for formula in yolo_formulas])
 
-            # Filter out text blocks that overlap with YOLO regions
+            # Filter out text blocks that overlap with YOLO figure regions (but not formula regions)
             filtered_blocks = []
             filtered_count = 0
             for block in text_blocks:
@@ -600,19 +697,46 @@ class HybridConverter:
                     continue
 
                 block_bbox = fitz.Rect(block['bbox'])
-                overlaps = False
+                overlaps_with_figure = False
                 for yolo_rect in yolo_rects:
                     overlap_ratio = _rect_overlap_ratio(block_bbox, yolo_rect)
-                    if overlap_ratio > 0.5:  # More than 50% overlap
-                        overlaps = True
+                    if overlap_ratio > 0.5:  # More than 50% overlap with figure
+                        overlaps_with_figure = True
                         filtered_count += 1
                         break
 
-                if not overlaps:
+                if not overlaps_with_figure:
                     filtered_blocks.append(block)
 
+            # Insert formula placeholder text blocks
+            for formula_idx, formula in enumerate(yolo_formulas):
+                bbox = formula['bbox']
+                placeholder_text = f"FORMULA_PLACEHOLDER_{page_num}_{formula_idx}"
+
+                # Create a text block for the placeholder
+                placeholder_block = {
+                    'type': 0,  # Text block
+                    'bbox': tuple(bbox),
+                    'lines': [{
+                        'bbox': tuple(bbox),
+                        'wmode': 0,
+                        'dir': [1, 0],
+                        'spans': [{
+                            'bbox': tuple(bbox),
+                            'text': placeholder_text,
+                            'size': 12,
+                            'flags': 0,
+                            'font': 'Arial',
+                            'color': 0
+                        }]
+                    }]
+                }
+                filtered_blocks.append(placeholder_block)
+
             if filtered_count > 0:
-                print(f"[Filter] Page {page_num + 1}: Filtered {filtered_count} text blocks overlapping with YOLO regions")
+                print(f"[Filter] Page {page_num + 1}: Filtered {filtered_count} text blocks overlapping with figures")
+            if yolo_formulas:
+                print(f"[Filter] Page {page_num + 1}: Inserted {len(yolo_formulas)} formula placeholders")
 
             return filtered_blocks
 

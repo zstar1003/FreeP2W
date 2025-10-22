@@ -1,0 +1,9 @@
+Formula alignment verification:
+============================================================
+
+Formula 1 (Paragraph 36): CENTER
+Formula 2 (Paragraph 37): CENTER
+Formula 3 (Paragraph 42): CENTER
+
+============================================================
+All 3 formulas checked

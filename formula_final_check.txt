@@ -1,0 +1,20 @@
+Formula verification in document:
+============================================================
+
+Formula 1 (Paragraph 36):
+  Text: xt=tx1+(1−t)x0.
+  Before: Training objective. Flow matching provides a theoretically grounded framework fo...
+  After: ...
+
+Formula 2 (Paragraph 37):
+  Text: vt=dxtdt=x1−x0.
+  Before: ...
+  After: The model is trained to predict the velocity, thus, the loss function can be for...
+
+Formula 3 (Paragraph 42):
+  Text: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,
+  Before: ...
+  After: where ctxt is the umT5 text embedding sequence of 512 tokens long, θ is the mode...
+
+============================================================
+Total: 3 formulas found
