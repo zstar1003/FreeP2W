@@ -433,14 +433,29 @@ class HybridConverter:
                         math_run = self._create_omml_from_mathml(mathml)
 
                         if math_run:
-                            # Clear the paragraph content
+                            # Clear the paragraph content completely
                             para.clear()
+
+                            # Reset paragraph formatting to remove any indentation or spacing
+                            from docx.shared import Pt, Inches
 
                             # Set paragraph alignment to center
                             para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
+                            # Remove all indentation
+                            para.paragraph_format.left_indent = Inches(0)
+                            para.paragraph_format.right_indent = Inches(0)
+                            para.paragraph_format.first_line_indent = Inches(0)
+
+                            # Set spacing
+                            para.paragraph_format.space_before = Pt(6)
+                            para.paragraph_format.space_after = Pt(6)
+
                             # Insert the math run
                             para._element.append(math_run)
+
+                            # Clean up whitespace text nodes in the paragraph element
+                            self._remove_blank_text_nodes(para._element)
 
                             replaced_count += 1
                             print(f"    ✓ Replaced with: {latex[:60]}...")
@@ -461,6 +476,96 @@ class HybridConverter:
 
         # Save document
         doc.save(docx_path)
+
+        # Post-process the DOCX file to remove whitespace from formulas
+        self._cleanup_formula_whitespace(docx_path)
+
+    def _cleanup_formula_whitespace(self, docx_path):
+        """
+        Post-process DOCX file to remove whitespace from math formulas
+
+        Args:
+            docx_path: Path to DOCX file
+        """
+        import zipfile
+        import tempfile
+        import os
+        import re
+        from lxml import etree
+
+        try:
+            # Create a temporary file
+            temp_fd, temp_path = tempfile.mkstemp(suffix='.docx')
+            os.close(temp_fd)
+
+            # Open the DOCX as a ZIP file
+            with zipfile.ZipFile(docx_path, 'r') as zip_in:
+                with zipfile.ZipFile(temp_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
+                    for item in zip_in.namelist():
+                        data = zip_in.read(item)
+
+                        # Process word/document.xml to clean formula whitespace
+                        if item == 'word/document.xml':
+                            # Parse XML
+                            root = etree.fromstring(data)
+
+                            # Find all m:oMath elements and remove whitespace
+                            nsmap = {
+                                'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
+                                'm': 'http://schemas.openxmlformats.org/officeDocument/2006/math'
+                            }
+
+                            for math_elem in root.xpath('.//m:oMath', namespaces=nsmap):
+                                # Remove text content (whitespace) directly under m:oMath
+                                if math_elem.text and not math_elem.text.strip():
+                                    math_elem.text = None
+
+                                # Remove whitespace tails from all descendants
+                                for elem in math_elem.iter():
+                                    if elem.tail and not elem.tail.strip():
+                                        elem.tail = None
+
+                            # Serialize back to bytes without pretty printing
+                            data = etree.tostring(root, encoding='utf-8', xml_declaration=True)
+
+                        # Write to new ZIP
+                        zip_out.writestr(item, data)
+
+            # Replace original file with cleaned version
+            import shutil
+            shutil.move(temp_path, docx_path)
+
+            print(f"[Formula] Cleaned whitespace from formulas")
+
+        except Exception as e:
+            print(f"[Warning] Failed to cleanup formula whitespace: {e}")
+            import traceback
+            traceback.print_exc()
+            # Clean up temp file if it exists
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+
+    def _remove_blank_text_nodes(self, element):
+        """
+        Recursively remove blank text nodes from an XML element tree
+
+        Args:
+            element: lxml Element
+        """
+        # Remove blank text at element start
+        if element.text and not element.text.strip():
+            element.text = None
+
+        # Process all children
+        for child in element:
+            # Remove blank tail of previous sibling
+            if child.tail and not child.tail.strip():
+                child.tail = None
+            # Recursively process child
+            self._remove_blank_text_nodes(child)
 
     def _mathml_to_omml(self, mathml_elem):
         """
@@ -554,25 +659,35 @@ class HybridConverter:
         """
         from docx.oxml import parse_xml
         from lxml import etree
+        import re
 
         try:
             # Parse the MathML
             mathml_tree = etree.fromstring(mathml.encode('utf-8'))
 
             # Convert MathML to OMML
-            omml_content = self._mathml_to_omml(mathml_tree)
+            omml_content = self._mathml_to_omml(mathml_tree).strip()
 
-            # Create OMML run with math zone
-            omml_xml = f'''
-            <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-                 xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">
-                <m:oMath>
-                    {omml_content}
-                </m:oMath>
-            </w:r>
-            '''
+            # Remove all inter-tag whitespace (between > and <)
+            omml_content = re.sub(r'>\s+<', '><', omml_content)
 
-            omml_elem = parse_xml(omml_xml)
+            # Create OMML run with math zone (no whitespace!)
+            omml_xml = (
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+                'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">'
+                f'<m:oMath>{omml_content}</m:oMath>'
+                '</w:r>'
+            )
+
+            # Parse with lxml first to clean whitespace
+            parser = etree.XMLParser(remove_blank_text=True)
+            lxml_elem = etree.fromstring(omml_xml.encode('utf-8'), parser=parser)
+
+            # Convert back to string without pretty printing
+            clean_xml = etree.tostring(lxml_elem, encoding='unicode')
+
+            # Now parse with docx parser
+            omml_elem = parse_xml(clean_xml)
             return omml_elem
 
         except Exception as e:

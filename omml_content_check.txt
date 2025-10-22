@@ -1,0 +1,55 @@
+OMML content whitespace check:
+============================================================
+
+Paragraph 36:
+  Starts with whitespace: True
+  Ends with whitespace: True
+  First 200 chars: 
+      <m:sSub>
+        <m:e>
+          <m:r>
+            <m:t>x</m:t>
+          </m:r>
+        </m:e>
+        <m:sub>
+          <m:r>
+            <m:t>t</m:t>
+          </m:r>
+        </m:sub>
+      
+
+Paragraph 37:
+  Starts with whitespace: True
+  Ends with whitespace: True
+  First 200 chars: 
+      <m:sSub>
+        <m:e>
+          <m:r>
+            <m:t>v</m:t>
+          </m:r>
+        </m:e>
+        <m:sub>
+          <m:r>
+            <m:t>t</m:t>
+          </m:r>
+        </m:sub>
+      
+
+Paragraph 42:
+  Starts with whitespace: True
+  Ends with whitespace: True
+  First 200 chars: 
+      <m:r>
+        <m:t>L</m:t>
+      </m:r>
+      <m:r>
+        <m:t>=</m:t>
+      </m:r>
+      <m:sSub>
+        <m:e>
+          <m:r>
+            <m:t>E</m:t>
+          </m:r>
+        </m:e>
+     
+

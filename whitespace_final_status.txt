@@ -1,0 +1,16 @@
+Final check - OMML whitespace:
+============================================================
+
+Para 36: PROBLEM - Has whitespace (Leading=True, Trailing=True)
+  First 3 chars: '\n  '
+  Last 3 chars: '   '
+
+Para 37: PROBLEM - Has whitespace (Leading=True, Trailing=True)
+  First 3 chars: '\n  '
+  Last 3 chars: '   '
+
+Para 42: PROBLEM - Has whitespace (Leading=True, Trailing=True)
+  First 3 chars: '\n  '
+  Last 3 chars: '   '
+
+============================================================

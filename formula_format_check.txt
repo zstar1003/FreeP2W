@@ -1,0 +1,32 @@
+Formula paragraph formatting check:
+============================================================
+
+Formula 1 (Paragraph 36):
+  Alignment: CENTER (1)
+  Left indent: 0
+  Right indent: 0
+  First line indent: 0
+  Space before: 76200
+  Space after: 76200
+  Number of runs: 1
+
+Formula 2 (Paragraph 37):
+  Alignment: CENTER (1)
+  Left indent: 0
+  Right indent: 0
+  First line indent: 0
+  Space before: 76200
+  Space after: 76200
+  Number of runs: 1
+
+Formula 3 (Paragraph 42):
+  Alignment: CENTER (1)
+  Left indent: 0
+  Right indent: 0
+  First line indent: 0
+  Space before: 76200
+  Space after: 76200
+  Number of runs: 1
+
+============================================================
+Total: 3 formulas checked
