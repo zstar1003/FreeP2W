@@ -441,36 +441,148 @@ class HybridConverter:
                         math_run = self._create_omml_from_mathml(mathml)
 
                         if math_run:
-                            # Clear the paragraph content completely
+                            # Use a single-row, 3-column invisible table for perfect alignment
+                            # This is the standard professional method in Word for centered formula + right-aligned number
+                            from docx.shared import Pt, Inches
+                            from docx.oxml import OxmlElement
+                            from docx.oxml.ns import qn
+                            from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+                            # Clear the paragraph
                             para.clear()
 
-                            # Reset paragraph formatting to remove any indentation or spacing
-                            from docx.shared import Pt, Inches
+                            # Create a table structure in XML (1 row, 3 columns)
+                            # Column 1: Empty (balance)
+                            # Column 2: Formula (centered)
+                            # Column 3: Number (right-aligned)
 
-                            # Set paragraph alignment to center
-                            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                            tbl = OxmlElement('w:tbl')
 
-                            # Remove all indentation
-                            para.paragraph_format.left_indent = Inches(0)
-                            para.paragraph_format.right_indent = Inches(0)
-                            para.paragraph_format.first_line_indent = Inches(0)
+                            # Table properties - no borders, full width
+                            tblPr = OxmlElement('w:tblPr')
 
-                            # Set spacing
-                            para.paragraph_format.space_before = Pt(6)
-                            para.paragraph_format.space_after = Pt(6)
+                            # Table width = 100%
+                            tblW = OxmlElement('w:tblW')
+                            tblW.set(qn('w:type'), 'pct')
+                            tblW.set(qn('w:w'), '5000')  # 100% = 5000 in pct
+                            tblPr.append(tblW)
 
-                            # Insert the math run
-                            para._element.append(math_run)
+                            # No borders
+                            tblBorders = OxmlElement('w:tblBorders')
+                            for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+                                border = OxmlElement(f'w:{border_name}')
+                                border.set(qn('w:val'), 'none')
+                                border.set(qn('w:sz'), '0')
+                                border.set(qn('w:space'), '0')
+                                border.set(qn('w:color'), 'auto')
+                                tblBorders.append(border)
+                            tblPr.append(tblBorders)
 
-                            # Add equation number if present
+                            # Table layout: fixed
+                            tblLayout = OxmlElement('w:tblLayout')
+                            tblLayout.set(qn('w:type'), 'fixed')
+                            tblPr.append(tblLayout)
+
+                            # No cell spacing
+                            tblCellSpacing = OxmlElement('w:tblCellSpacing')
+                            tblCellSpacing.set(qn('w:w'), '0')
+                            tblCellSpacing.set(qn('w:type'), 'dxa')
+                            tblPr.append(tblCellSpacing)
+
+                            tbl.append(tblPr)
+
+                            # Table grid - 3 columns with equal width
+                            tblGrid = OxmlElement('w:tblGrid')
+                            for _ in range(3):
+                                gridCol = OxmlElement('w:gridCol')
+                                tblGrid.append(gridCol)
+                            tbl.append(tblGrid)
+
+                            # Create the single row
+                            tr = OxmlElement('w:tr')
+
+                            # Row height auto
+                            trPr = OxmlElement('w:trPr')
+                            trHeight = OxmlElement('w:trHeight')
+                            trHeight.set(qn('w:val'), '0')
+                            trHeight.set(qn('w:hRule'), 'auto')
+                            trPr.append(trHeight)
+                            tr.append(trPr)
+
+                            # Cell 1: Empty (for balance)
+                            tc1 = OxmlElement('w:tc')
+                            tcPr1 = OxmlElement('w:tcPr')
+                            tcW1 = OxmlElement('w:tcW')
+                            tcW1.set(qn('w:type'), 'pct')
+                            tcW1.set(qn('w:w'), '1667')  # 33.3%
+                            tcPr1.append(tcW1)
+                            tc1.append(tcPr1)
+                            p1 = OxmlElement('w:p')
+                            tc1.append(p1)
+                            tr.append(tc1)
+
+                            # Cell 2: Formula (centered)
+                            tc2 = OxmlElement('w:tc')
+                            tcPr2 = OxmlElement('w:tcPr')
+                            tcW2 = OxmlElement('w:tcW')
+                            tcW2.set(qn('w:type'), 'pct')
+                            tcW2.set(qn('w:w'), '1667')  # 33.3%
+                            tcPr2.append(tcW2)
+                            tc2.append(tcPr2)
+
+                            p2 = OxmlElement('w:p')
+                            # Center alignment for formula
+                            pPr2 = OxmlElement('w:pPr')
+                            jc2 = OxmlElement('w:jc')
+                            jc2.set(qn('w:val'), 'center')
+                            pPr2.append(jc2)
+                            p2.append(pPr2)
+                            # Add the math run to this paragraph
+                            p2.append(math_run)
+                            tc2.append(p2)
+                            tr.append(tc2)
+
+                            # Cell 3: Equation number (right-aligned)
+                            tc3 = OxmlElement('w:tc')
+                            tcPr3 = OxmlElement('w:tcPr')
+                            tcW3 = OxmlElement('w:tcW')
+                            tcW3.set(qn('w:type'), 'pct')
+                            tcW3.set(qn('w:w'), '1666')  # 33.3%
+                            tcPr3.append(tcW3)
+                            tc3.append(tcPr3)
+
+                            p3 = OxmlElement('w:p')
                             if equation_number:
-                                # Add a tab or space, then the equation number
-                                number_run = para.add_run(f"    {equation_number}")
-                                number_run.font.size = Pt(11)
-                                print(f"    ✓ Added equation number: {equation_number}")
+                                # Right alignment for equation number
+                                pPr3 = OxmlElement('w:pPr')
+                                jc3 = OxmlElement('w:jc')
+                                jc3.set(qn('w:val'), 'right')
+                                pPr3.append(jc3)
+                                p3.append(pPr3)
 
-                            # Clean up whitespace text nodes in the paragraph element
-                            self._remove_blank_text_nodes(para._element)
+                                # Add the equation number as text run
+                                r3 = OxmlElement('w:r')
+                                rPr3 = OxmlElement('w:rPr')
+                                sz3 = OxmlElement('w:sz')
+                                sz3.set(qn('w:val'), '22')  # 11pt
+                                rPr3.append(sz3)
+                                r3.append(rPr3)
+
+                                t3 = OxmlElement('w:t')
+                                t3.text = equation_number
+                                r3.append(t3)
+                                p3.append(r3)
+
+                                print(f"    ✓ Added equation number: {equation_number}")
+                            tc3.append(p3)
+                            tr.append(tc3)
+
+                            # Add row to table
+                            tbl.append(tr)
+
+                            # Replace the paragraph with this table
+                            para._element.getparent().insert(para._element.getparent().index(para._element), tbl)
+                            para._element.getparent().remove(para._element)
 
                             replaced_count += 1
                             print(f"    ✓ Replaced with: {latex[:60]}...")
