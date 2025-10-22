@@ -354,7 +354,7 @@ class HybridConverter:
             page = pdf_doc[page_num]
             page_formulas = []
 
-            for formula in formulas:
+            for formula_idx, formula in enumerate(formulas):
                 bbox = formula['bbox']
 
                 # Recognize formula
@@ -366,11 +366,18 @@ class HybridConverter:
                 mathml = self._latex_to_mathml(latex)
 
                 if mathml:
-                    page_formulas.append({
+                    formula_info = {
                         'bbox': bbox,
                         'latex': latex,
                         'mathml': mathml
-                    })
+                    }
+
+                    # Preserve equation number if detected
+                    if 'equation_number' in formula:
+                        formula_info['equation_number'] = formula['equation_number']
+                        print(f"  Equation number: {formula['equation_number']}")
+
+                    page_formulas.append(formula_info)
                     print(f"  ✓ Converted to MathML")
                 else:
                     print(f"  ✗ MathML conversion failed")
@@ -421,6 +428,7 @@ class HybridConverter:
                 if placeholder_id in para_text:
                     mathml = formula_info['mathml']
                     latex = formula_info['latex']
+                    equation_number = formula_info.get('equation_number', None)
 
                     print(f"  [Formula] Found placeholder '{placeholder_id}' at paragraph {para_idx}, replacing...")
 
@@ -453,6 +461,13 @@ class HybridConverter:
 
                             # Insert the math run
                             para._element.append(math_run)
+
+                            # Add equation number if present
+                            if equation_number:
+                                # Add a tab or space, then the equation number
+                                number_run = para.add_run(f"    {equation_number}")
+                                number_run.font.size = Pt(11)
+                                print(f"    ✓ Added equation number: {equation_number}")
 
                             # Clean up whitespace text nodes in the paragraph element
                             self._remove_blank_text_nodes(para._element)
@@ -799,6 +814,62 @@ class HybridConverter:
             if not yolo_figures and not yolo_formulas:
                 return text_blocks
 
+            # First, detect equation numbers for formulas BEFORE filtering
+            # Extract directly from PDF page instead of relying on text_blocks
+            page = self.page_engine
+            for formula_idx, formula in enumerate(yolo_formulas):
+                bbox = formula['bbox']
+                formula_rect = fitz.Rect(bbox)
+
+                # Debug: print formula bbox
+                print(f"[Debug] Page {page_num + 1}, Formula {formula_idx} bbox: {bbox}")
+
+                # Try to find equation number by extracting text from area to the right of formula
+                # Create a search rectangle to the right of the formula
+                search_rect = fitz.Rect(
+                    formula_rect.x1 - 5,  # Start slightly before formula end
+                    formula_rect.y0 - 5,  # Expand vertically a bit
+                    formula_rect.x1 + 100,  # Search 100 points to the right
+                    formula_rect.y1 + 5
+                )
+
+                # Extract text from this region
+                text_dict = page.get_textpage().extractDICT()
+                equation_number = None
+
+                for block in text_dict.get('blocks', []):
+                    if block.get('type') != 0:  # Only text blocks
+                        continue
+
+                    block_bbox = fitz.Rect(block['bbox'])
+
+                    # Check if this block intersects with our search rectangle
+                    if not search_rect.intersects(block_bbox):
+                        continue
+
+                    # Extract text from this block
+                    block_text = ''
+                    for line in block.get('lines', []):
+                        for span in line.get('spans', []):
+                            block_text += span.get('text', '')
+
+                    if not block_text.strip():
+                        continue
+
+                    print(f"[Debug]   Found text in search area: '{block_text}'")
+
+                    # Check if it matches equation number pattern
+                    import re
+                    match = re.search(r'\(\s*\d+(\.\d+)?\s*\)', block_text)
+                    if match:
+                        equation_number = match.group(0)
+                        print(f"[Formula] Detected equation number: '{equation_number}' for formula {formula_idx}")
+                        break
+
+                # Store in formula metadata
+                if equation_number:
+                    formula['equation_number'] = equation_number
+
             # Convert YOLO figure regions to Rect list (NOT formulas - we want to keep formula text areas)
             yolo_rects = [fitz.Rect(fig['bbox']) for fig in yolo_figures]
 
@@ -826,7 +897,11 @@ class HybridConverter:
             # Insert formula placeholder text blocks
             for formula_idx, formula in enumerate(yolo_formulas):
                 bbox = formula['bbox']
+                formula_rect = fitz.Rect(bbox)
                 placeholder_text = f"FORMULA_PLACEHOLDER_{page_num}_{formula_idx}"
+
+                # Get equation number if detected earlier
+                equation_number = formula.get('equation_number', None)
 
                 # Create a text block for the placeholder
                 placeholder_block = {
@@ -846,6 +921,22 @@ class HybridConverter:
                         }]
                     }]
                 }
+
+                # Add equation number as a separate span if found
+                if equation_number:
+                    # Extend bbox to include number position (to the right)
+                    extended_bbox = list(bbox)
+                    extended_bbox[2] += 50  # Add some width for the number
+
+                    placeholder_block['lines'][0]['spans'].append({
+                        'bbox': tuple(extended_bbox),
+                        'text': f" {equation_number}",  # Add space before number
+                        'size': 12,
+                        'flags': 0,
+                        'font': 'Arial',
+                        'color': 0
+                    })
+
                 filtered_blocks.append(placeholder_block)
 
             if filtered_count > 0:
