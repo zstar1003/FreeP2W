@@ -660,6 +660,208 @@ class HybridConverter:
         # Post-process the DOCX file to remove whitespace from formulas
         self._cleanup_formula_whitespace(docx_path)
 
+        # Process inline math symbols in text
+        if use_yolo:
+            self._process_inline_math(docx_path)
+
+    def _process_inline_math(self, docx_path):
+        """
+        Process inline math symbols in paragraph text and convert to OMML
+
+        Args:
+            docx_path: Path to DOCX file
+        """
+        from docx import Document
+        from docx.oxml import OxmlElement, parse_xml
+        from docx.oxml.ns import qn
+        import re
+
+        print("\n[InlineMath] Processing inline math symbols...")
+
+        doc = Document(docx_path)
+
+        # Define math symbol patterns
+        math_symbols = {
+            '∈': ('element-of', 'in'),
+            '∉': ('not-element-of', 'notin'),
+            '⊂': ('subset', 'subset'),
+            '⊃': ('superset', 'supset'),
+            '∩': ('intersection', 'cap'),
+            '∪': ('union', 'cup'),
+            '∀': ('for-all', 'forall'),
+            '∃': ('exists', 'exists'),
+            '∇': ('nabla', 'nabla'),
+            '∂': ('partial', 'partial'),
+            '∫': ('integral', 'int'),
+            '∑': ('sum', 'sum'),
+            '∏': ('product', 'prod'),
+            '√': ('square-root', 'sqrt'),
+            '±': ('plus-minus', 'pm'),
+            '×': ('times', 'times'),
+            '÷': ('divide', 'div'),
+            '≤': ('less-equal', 'leq'),
+            '≥': ('greater-equal', 'geq'),
+            '≠': ('not-equal', 'neq'),
+            '≈': ('approximately', 'approx'),
+            '∞': ('infinity', 'infty'),
+            '∼': ('tilde', 'sim'),
+            '→': ('arrow-right', 'rightarrow'),
+            '←': ('arrow-left', 'leftarrow'),
+            # Greek letters
+            'α': ('alpha', 'alpha'),
+            'β': ('beta', 'beta'),
+            'γ': ('gamma', 'gamma'),
+            'δ': ('delta', 'delta'),
+            'ε': ('epsilon', 'epsilon'),
+            'ζ': ('zeta', 'zeta'),
+            'η': ('eta', 'eta'),
+            'θ': ('theta', 'theta'),
+            'ι': ('iota', 'iota'),
+            'κ': ('kappa', 'kappa'),
+            'λ': ('lambda', 'lambda'),
+            'μ': ('mu', 'mu'),
+            'ν': ('nu', 'nu'),
+            'ξ': ('xi', 'xi'),
+            'ο': ('omicron', 'omicron'),
+            'π': ('pi', 'pi'),
+            'ρ': ('rho', 'rho'),
+            'σ': ('sigma', 'sigma'),
+            'τ': ('tau', 'tau'),
+            'υ': ('upsilon', 'upsilon'),
+            'φ': ('phi', 'phi'),
+            'χ': ('chi', 'chi'),
+            'ψ': ('psi', 'psi'),
+            'ω': ('omega', 'omega'),
+        }
+
+        # Count how many paragraphs we process
+        processed_count = 0
+
+        for para in doc.paragraphs:
+            text = para.text
+
+            # Check if paragraph contains any math symbols
+            has_math = any(symbol in text for symbol in math_symbols.keys())
+
+            if has_math:
+                # Process this paragraph
+                self._convert_inline_math_in_paragraph(para, math_symbols)
+                processed_count += 1
+
+        print(f"[InlineMath] Processed {processed_count} paragraphs with inline math")
+
+        # Save document
+        doc.save(docx_path)
+
+    def _convert_inline_math_in_paragraph(self, para, math_symbols):
+        """
+        Convert inline math symbols in a paragraph to OMML format
+
+        Args:
+            para: docx.paragraph.Paragraph object
+            math_symbols: Dictionary of symbol -> (name, latex) mappings
+        """
+        from docx.oxml import OxmlElement, parse_xml
+        from docx.oxml.ns import qn
+
+        # Get paragraph text
+        text = para.text
+
+        # Find all math symbols and their positions
+        symbol_positions = []
+        for symbol in math_symbols.keys():
+            pos = 0
+            while True:
+                pos = text.find(symbol, pos)
+                if pos == -1:
+                    break
+                symbol_positions.append((pos, symbol))
+                pos += 1
+
+        # If no symbols, return
+        if not symbol_positions:
+            return
+
+        # Sort by position
+        symbol_positions.sort(key=lambda x: x[0])
+
+        # Build new paragraph content with math runs
+        # We need to rebuild the paragraph from scratch
+        parent = para._element.getparent()
+        para_index = parent.index(para._element)
+
+        # Create new paragraph element
+        new_para = OxmlElement('w:p')
+
+        # Copy paragraph properties if any
+        pPr = para._element.find(qn('w:pPr'))
+        if pPr is not None:
+            new_para.append(pPr)
+
+        # Build runs: text segments + math runs
+        last_pos = 0
+        for pos, symbol in symbol_positions:
+            # Add text before symbol
+            if pos > last_pos:
+                text_before = text[last_pos:pos]
+                text_run = OxmlElement('w:r')
+                text_elem = OxmlElement('w:t')
+                text_elem.set(qn('xml:space'), 'preserve')
+                text_elem.text = text_before
+                text_run.append(text_elem)
+                new_para.append(text_run)
+
+            # Add math run for symbol
+            math_run = self._create_inline_math_run(symbol)
+            if math_run is not None:
+                new_para.append(math_run)
+
+            last_pos = pos + len(symbol)
+
+        # Add remaining text
+        if last_pos < len(text):
+            text_after = text[last_pos:]
+            text_run = OxmlElement('w:r')
+            text_elem = OxmlElement('w:t')
+            text_elem.set(qn('xml:space'), 'preserve')
+            text_elem.text = text_after
+            text_run.append(text_elem)
+            new_para.append(text_run)
+
+        # Replace old paragraph with new one
+        parent.insert(para_index, new_para)
+        parent.remove(para._element)
+
+    def _create_inline_math_run(self, symbol):
+        """
+        Create an inline math run (OMML) for a single symbol
+
+        Args:
+            symbol: Unicode math symbol string
+
+        Returns:
+            OxmlElement (w:r with m:oMath) or None
+        """
+        from docx.oxml import OxmlElement, parse_xml
+        from docx.oxml.ns import qn
+
+        try:
+            # Create a simple OMML structure for the symbol
+            # We'll use m:r (math run) with m:t (math text)
+            omml_xml = (
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+                'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">'
+                '<m:oMath><m:r><m:t>' + symbol + '</m:t></m:r></m:oMath>'
+                '</w:r>'
+            )
+
+            omml_elem = parse_xml(omml_xml)
+            return omml_elem
+
+        except Exception as e:
+            print(f"[Warning] Failed to create inline math for symbol '{symbol}': {e}")
+            return None
+
     def _cleanup_formula_whitespace(self, docx_path):
         """
         Post-process DOCX file to remove whitespace from math formulas
