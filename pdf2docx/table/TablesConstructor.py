@@ -65,7 +65,7 @@ class TablesConstructor:
                 # contained groups: keep the largest one
                 else:
                     sorted_group = sorted(group_instances, 
-                        key=lambda instance: instance.bbox.get_area())
+                        key=lambda instance: (instance.bbox.width * instance.bbox.height))
                     instance = sorted_group[-1]
                 
                 unique_groups.append(instance)

@@ -395,7 +395,7 @@ class Blocks(ElementCollection):
         # delete overlapped lines
         for group in filter(lambda group: len(group)>1, groups):
             # keep only the line with largest area
-            sorted_lines = sorted(group, key=lambda line: line.bbox.get_area())
+            sorted_lines = sorted(group, key=lambda line: (line.bbox.width * line.bbox.height))
             for line in sorted_lines[:-1]:
                 logging.warning('Ignore Line "%s" due to overlap', line.text)
                 line.update_bbox((0,0,0,0))

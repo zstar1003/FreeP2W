@@ -192,7 +192,7 @@ class Stroke(Shape):
         rect = fitz.Rect(rect)
 
         # an empty area line
-        if rect.get_area()==0.0:
+        if (rect.width * rect.height)==0.0:
             self._start = fitz.Point(rect[0:2])
             self._end = fitz.Point(rect[2:])
             super().update_bbox(self._to_rect())

@@ -351,7 +351,7 @@ class ElementCollection(Collection):
             if intersection.is_empty:
                 no_intersections.append(instance)
             else:
-                factor = round(intersection.get_area()/instance.bbox.get_area(), 2)
+                factor = round((intersection.width * intersection.height)/(instance.bbox.width * instance.bbox.height), 2)
                 if factor >= threshold:
                     intersections.append(instance)
                 else:

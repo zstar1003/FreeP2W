@@ -128,7 +128,7 @@ class ImagesExtractor:
             unrotated_page_bbox = self._page.cropbox  # note the difference to page.rect
             for bbox in rects:
                 # ignore small images
-                if bbox.get_area() <= 4:
+                if (bbox.width * bbox.height) <= 4:
                     continue
 
                 # ignore images outside page

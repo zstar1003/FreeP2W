@@ -209,8 +209,8 @@ class Shapes(ElementCollection):
 
         merged_shapes = []
         for group in groups:
-            merged_area = group.bbox.get_area()
-            sum_area = sum(shape.bbox.get_area() for shape in group)
+            merged_area = (group.bbox.width * group.bbox.height)
+            sum_area = sum((shape.bbox.width * shape.bbox.height) for shape in group)
             if sum_area/merged_area >= constants.FACTOR_ALMOST:
                 merged_shapes.append(group[0].update_bbox(group.bbox))
             else:

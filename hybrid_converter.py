@@ -136,13 +136,13 @@ class HybridConverter:
     """
 
     def __init__(self, yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
-                 unimernet_cfg_path="FreeTex/demo.yaml"):
+                 unimernet_cfg_path="demo.yaml"):
         """
         Initialize hybrid converter
 
         Args:
             yolo_model_path: Path to DocLayout-YOLO model
-            unimernet_cfg_path: Path to UniMERNet config file
+            unimernet_cfg_path: Path to UniMERNet config file (default: demo.yaml in project root)
         """
         self.yolo_detector = YOLORegionDetector(model_path=yolo_model_path)
         self.unimernet_cfg_path = unimernet_cfg_path
@@ -159,16 +159,12 @@ class HybridConverter:
         import sys
         import os
 
-        # Save current directory
-        original_dir = os.getcwd()
+        # Get project root directory (where hybrid_converter.py is located)
+        project_root = os.path.dirname(os.path.abspath(__file__))
 
-        # Change to FreeTex directory for model loading
-        freetex_dir = os.path.join(os.path.dirname(__file__), 'FreeTex')
-        os.chdir(freetex_dir)
-
-        # Add FreeTex to path
-        if freetex_dir not in sys.path:
-            sys.path.insert(0, freetex_dir)
+        # Add project root to path if not already there
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
 
         try:
             import argparse
@@ -176,8 +172,12 @@ class HybridConverter:
             from unimernet.common.config import Config
             from unimernet.processors import load_processor
 
-            # Setup model
-            args = argparse.Namespace(cfg_path=os.path.basename(self.unimernet_cfg_path), options=None)
+            # Setup model - use absolute path for config
+            cfg_path = os.path.join(project_root, self.unimernet_cfg_path)
+            if not os.path.exists(cfg_path):
+                raise FileNotFoundError(f"Config file not found: {cfg_path}")
+
+            args = argparse.Namespace(cfg_path=cfg_path, options=None)
             cfg = Config(args)
 
             task = tasks.setup_task(cfg)
@@ -195,9 +195,13 @@ class HybridConverter:
 
             print(f"[UniMERNet] Model loaded on {device}\n")
 
-        finally:
-            # Restore original directory
-            os.chdir(original_dir)
+        except ImportError as e:
+            print(f"[Error] Failed to import UniMERNet modules: {e}")
+            print(f"[Error] Make sure 'unimernet' folder is in: {project_root}")
+            raise
+        except Exception as e:
+            print(f"[Error] Failed to load UniMERNet model: {e}")
+            raise
 
     def _recognize_formula(self, page, bbox):
         """
@@ -660,9 +664,8 @@ class HybridConverter:
         # Post-process the DOCX file to remove whitespace from formulas
         self._cleanup_formula_whitespace(docx_path)
 
-        # Process inline math symbols in text
-        if use_yolo:
-            self._process_inline_math(docx_path)
+        # Process inline math symbols in text (always enabled when formulas are detected)
+        self._process_inline_math(docx_path)
 
     def _process_inline_math(self, docx_path):
         """

@@ -62,7 +62,7 @@ class Element(IText):
         '''Real object when bbox is defined.'''
         # NOTE inconsistent results of fitz.Rect for different version of pymupdf, e.g.,
         # a = fitz.Rect(3,3,2,2)
-        #                   bool(a)      a.get_area()       a.is_empty
+        #                   bool(a)      (a.width * a.height)       a.is_empty
         # pymupdf 1.23.5      True            1.0              True
         # pymupdf 1.23.8      True            0.0              True
         # bool(fitz.Rect())==False
@@ -148,7 +148,7 @@ class Element(IText):
         Returns:
             bool: [description]
         """
-        S = e.bbox.get_area()
+        S = (e.bbox.width * e.bbox.height)
         if not S: return False
 
         # it's not practical to set a general threshold to consider the margin, so two steps:
@@ -156,7 +156,7 @@ class Element(IText):
         # - check the length in main direction strictly
         # A contains B => A & B = B
         intersection = self.bbox & e.bbox
-        factor = round(intersection.get_area()/S, 2)
+        factor = round((intersection.width * intersection.height)/S, 2)
         if factor<threshold: return False
 
         # check length
@@ -183,9 +183,10 @@ class Element(IText):
         b = bbox_1 & bbox_2
         if b.is_empty: return None # no intersection
 
-        # Note: if bbox_1 and bbox_2 intersects with only an edge, b is not empty but b.get_area()=0
+        # Note: if bbox_1 and bbox_2 intersects with only an edge, b is not empty but area=0
         # so give a small value when they're intersected but the area is zero
-        a1, a2, a = bbox_1.get_area(), bbox_2.get_area(), b.get_area()
+        # Use width * height instead of get_area() for fitz.Rect compatibility
+        a1, a2, a = bbox_1.width * bbox_1.height, bbox_2.width * bbox_2.height, b.width * b.height
         factor = a/min(a1,a2) if a else 1e-6
         return bbox_1 | bbox_2 if factor >= threshold else None
 

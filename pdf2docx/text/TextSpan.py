@@ -209,7 +209,7 @@ class TextSpan(Element):
         intsec = rect.bbox & self.bbox
 
         # no, then add this span as it is
-        # Note the case bool(intsec)=True but intsec.get_area()=0
+        # Note the case bool(intsec)=True but (intsec.width * intsec.height)=0
         if intsec.is_empty: return [self]
 
         # yes, then split spans:

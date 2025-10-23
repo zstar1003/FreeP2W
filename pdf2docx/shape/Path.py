@@ -157,7 +157,7 @@ class Segments:
     @property
     def is_iso_oriented(self):
         '''ISO-oriented criterion: the ratio of real area to bbox exceeds 0.9.'''
-        bbox_area = self.bbox.get_area()
+        bbox_area = (self.bbox.width * self.bbox.height)
         return bbox_area==0 or self.area/bbox_area>=constants.FACTOR_MOST
 
 
@@ -252,11 +252,11 @@ class Path:
             S = Segments(segments, close_path)
             self.items.append(S)
 
-            # update bbox: note iso-oriented line segments -> S.bbox.get_area()==0
+            # update bbox: note iso-oriented line segments -> (S.bbox.width * S.bbox.height)==0
             rect = S.bbox
             # Handle both old and new PyMuPDF versions
             try:
-                area = rect.get_area()
+                area = (rect.width * rect.height)
             except AttributeError:
                 area = rect.width * rect.height if hasattr(rect, 'width') else abs((rect.x1 - rect.x0) * (rect.y1 - rect.y0))
 
