@@ -1,0 +1,267 @@
+================================================================================
+DETAILED PARAGRAPH COMPARISON
+================================================================================
+
+
+================================================================================
+PARAGRAPH 1: Wan Team, Alibaba Group...
+================================================================================
+
+SMALLPDF:
+  Alignment: None
+  Font names: set()
+  Font sizes: {10.0}
+  Space before: 635
+  Space after: None
+  Line spacing: None
+  First line indent: None
+  Left indent: 335915
+  Right indent: None
+
+OUR OUTPUT:
+  Alignment: JUSTIFY (3)
+  Font names: {'Bookman Old Style'}
+  Font sizes: {10.0}
+  Space before: 245110
+  Space after: 0
+  Line spacing: 127000
+  First line indent: 0
+  Left indent: 1341120
+  Right indent: 0
+
+DIFFERENCES:
+  ⚠ Alignment: None vs JUSTIFY (3)
+  ⚠ Font names differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 2: Figure 1: Comparison of Wan with state-of-the-art open-sourc...
+================================================================================
+
+SMALLPDF:
+  Alignment: JUSTIFY (3)
+  Font names: {'Courier New'}
+  Font sizes: set()
+  Space before: 119380
+  Space after: None
+  Line spacing: 0.8875
+  First line indent: None
+  Left indent: 228600
+  Right indent: 226695
+
+OUR OUTPUT:
+  Alignment: JUSTIFY (3)
+  Font names: set()
+  Font sizes: set()
+  Space before: 1689100
+  Space after: 0
+  Line spacing: 139700
+  First line indent: 0
+  Left indent: 1233170
+  Right indent: 457200
+
+DIFFERENCES:
+  ⚠ Font names differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 3: Figure 8: Visualization results of video reconstruction acro...
+================================================================================
+
+SMALLPDF:
+  Alignment: JUSTIFY (3)
+  Font names: set()
+  Font sizes: set()
+  Space before: None
+  Space after: None
+  Line spacing: 0.95
+  First line indent: 3810
+  Left indent: 224155
+  Right indent: 226695
+
+OUR OUTPUT:
+  Alignment: CENTER (1)
+  Font names: {'Bookman Old Style'}
+  Font sizes: {10.0}
+  Space before: 151130
+  Space after: 0
+  Line spacing: 138430
+  First line indent: 3810
+  Left indent: 453390
+  Right indent: 457200
+
+DIFFERENCES:
+  ⚠ Alignment: JUSTIFY (3) vs CENTER (1)
+  ⚠ Font names differ
+  ⚠ Font sizes differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 4: Figure 9: Architecture of the Wan....
+================================================================================
+
+SMALLPDF:
+  Alignment: CENTER (1)
+  Font names: {'Courier New'}
+  Font sizes: set()
+  Space before: 107315
+  Space after: None
+  Line spacing: None
+  First line indent: None
+  Left indent: None
+  Right indent: None
+
+OUR OUTPUT:
+  Alignment: CENTER (1)
+  Font names: {'Bookman Old Style'}
+  Font sizes: {10.0}
+  Space before: 100330
+  Space after: 0
+  Line spacing: 133350
+  First line indent: 0
+  Left indent: 0
+  Right indent: 0
+
+DIFFERENCES:
+  ⚠ Font names differ
+  ⚠ Font sizes differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 5: features while reducing blurring and distortion around the l...
+================================================================================
+
+SMALLPDF:
+  Alignment: JUSTIFY (3)
+  Font names: {'Courier New'}
+  Font sizes: set()
+  Space before: None
+  Space after: None
+  Line spacing: 0.9375
+  First line indent: None
+  Left indent: 228600
+  Right indent: 224790
+
+OUR OUTPUT:
+  Alignment: JUSTIFY (3)
+  Font names: {'Bookman Old Style'}
+  Font sizes: {10.0}
+  Space before: 346710
+  Space after: 0
+  Line spacing: 138430
+  First line indent: 0
+  Left indent: 457200
+  Right indent: 454660
+
+DIFFERENCES:
+  ⚠ Font names differ
+  ⚠ Font sizes differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 6: In this section, we will provide a detailed introduction to ...
+================================================================================
+
+SMALLPDF:
+  Alignment: JUSTIFY (3)
+  Font names: set()
+  Font sizes: set()
+  Space before: None
+  Space after: None
+  Line spacing: 0.95
+  First line indent: 2540
+  Left indent: 225425
+  Right indent: 226695
+
+OUR OUTPUT:
+  Alignment: JUSTIFY (3)
+  Font names: {'Bookman Old Style'}
+  Font sizes: {10.0}
+  Space before: 149860
+  Space after: 0
+  Line spacing: 138430
+  First line indent: 2540
+  Left indent: 454660
+  Right indent: 457200
+
+DIFFERENCES:
+  ⚠ Font names differ
+  ⚠ Font sizes differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 7: encoder of Wan-VAE encodes it from pixel space into the late...
+================================================================================
+
+SMALLPDF:
+  Alignment: None
+  Font names: {'Arial', 'Georgia', 'Courier New', 'Lucida Sans Unicode', 'Bookman Old Style'}
+  Font sizes: set()
+  Space before: 51435
+  Space after: None
+  Line spacing: 0.8
+  First line indent: None
+  Left indent: 228600
+  Right indent: 218440
+
+OUR OUTPUT:
+  Alignment: None
+  Font names: set()
+  Font sizes: set()
+  Space before: 16510
+  Space after: 0
+  Line spacing: 139700
+  First line indent: 0
+  Left indent: 457200
+  Right indent: 457200
+
+DIFFERENCES:
+  ⚠ Font names differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs
+
+================================================================================
+PARAGRAPH 8: Diffusion transformer. The diffusion transformer mainly cons...
+================================================================================
+
+SMALLPDF:
+  Alignment: JUSTIFY (3)
+  Font names: {'Bookman Old Style', 'Book Antiqua'}
+  Font sizes: set()
+  Space before: 111125
+  Space after: None
+  Line spacing: 0.9375
+  First line indent: None
+  Left indent: 228600
+  Right indent: 635
+
+OUR OUTPUT:
+  Alignment: CENTER (1)
+  Font names: set()
+  Font sizes: set()
+  Space before: 0
+  Space after: 0
+  Line spacing: 138430
+  First line indent: 0
+  Left indent: 365760
+  Right indent: 0
+
+DIFFERENCES:
+  ⚠ Alignment: JUSTIFY (3) vs CENTER (1)
+  ⚠ Font names differ
+  ⚠ Space before differs
+  ⚠ Space after differs
+  ⚠ Line spacing differs

@@ -1,0 +1,400 @@
+================================================================================
+ORIGINAL RESULT.DOCX DETAILED ANALYSIS
+================================================================================
+
+
+================================================================================
+PARAGRAPH 1: WA N: OPEN AND ADVANCED LARGE-SCALE VIDEO GENERATIVE MODELS...
+================================================================================
+Alignment: None
+Space before: 0
+Space after: 0
+Line spacing: 241300
+Has math: False
+
+Runs (16 total):
+  Run 0: font=None            size=17.0pt   text='W'
+  Run 1: font=None            size=14.0pt   text='A N'
+  Run 2: font=None            size=17.5pt   text=': O'
+  Run 3: font=None            size=14.0pt   text='PEN AND'
+  Run 4: font=None            size=17.5pt   text=' A'
+
+================================================================================
+PARAGRAPH 2: Wan Team, Alibaba Group...
+================================================================================
+Alignment: None
+Space before: 245110
+Space after: 0
+Line spacing: 127000
+Has math: False
+
+Runs (1 total):
+  Run 0: font=None            size=10.0pt   text='Wan Team, Alibaba Group'
+
+================================================================================
+PARAGRAPH 4: Figure 1: Comparison of Wan with state-of-the-art open-source and clos...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 1689100
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (5 total):
+  Run 0: font=None            size=None     text='Figure 1: Comparison of Wan wi'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' '
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text='. (2024) is tested using the o'
+
+================================================================================
+PARAGRAPH 13: Figure 8: Visualization results of video reconstruction across differe...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 151130
+Space after: 0
+Line spacing: 138430
+Has math: False
+
+Runs (3 total):
+  Run 0: font=None            size=10.0pt   text='Figure 8: Visualization result'
+  Run 1: font=None            size=10.0pt   text='(first row), face (second row)'
+  Run 2: font=None            size=10.0pt   text='rich details but are not used '
+
+================================================================================
+PARAGRAPH 15: Figure 9: Architecture of the Wan....
+================================================================================
+Alignment: CENTER (1)
+Space before: 100330
+Space after: 0
+Line spacing: 133350
+Has math: False
+
+Runs (3 total):
+  Run 0: font=None            size=10.0pt   text='Figure 9: Architecture of the'
+  Run 1: font=None            size=10.0pt   text=' Wan'
+  Run 2: font=None            size=10.0pt   text='.'
+
+================================================================================
+PARAGRAPH 16: features while reducing blurring and distortion around the lips. In th...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 346710
+Space after: 0
+Line spacing: 138430
+Has math: False
+
+Runs (7 total):
+  Run 0: font=None            size=10.0pt   text='features while reducing blurri'
+  Run 1: font=None            size=10.0pt   text='third row, our method successf'
+  Run 2: font=None            size=10.0pt   text='distortion and loss. In the hi'
+  Run 3: font=None            size=10.0pt   text=' Wan'
+  Run 4: font=None            size=10.0pt   text='-VAE maintains the '
+
+================================================================================
+PARAGRAPH 18: In this section, we will provide a detailed introduction to the archit...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 149860
+Space after: 0
+Line spacing: 138430
+Has math: False
+
+Runs (3 total):
+  Run 0: font=None            size=10.0pt   text='In this section, we will provi'
+  Run 1: font=None            size=10.0pt   text='video model, specifically for '
+  Run 2: font=None            size=10.0pt   text='post-training phases.'
+
+================================================================================
+PARAGRAPH 19: Fig. 9, we present the architecture of Wan, which is designed based on...
+================================================================================
+Alignment: CENTER (1)
+Space before: 68580
+Space after: 0
+Line spacing: 146050
+Has math: True
+
+Runs (10 total):
+  Run 0: font=None            size=None     text=''
+  Run 1: font=None            size=None     text=' Fig. 9, we present the archit'
+  Run 2: font=None            size=None     text=''
+  Run 3: font=None            size=None     text='R(1+T )'
+  Run 4: font=None            size=None     text=''
+
+================================================================================
+PARAGRAPH 23: encoder of Wan-VAE encodes it from pixel space into the latent space ,...
+================================================================================
+Alignment: None
+Space before: 16510
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (3 total):
+  Run 0: font=None            size=None     text='encoder of Wan-VAE encodes it '
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=', which is then fed into the s'
+
+================================================================================
+PARAGRAPH 24: 4.2.1 VIDEO DIFFUSION TRANSFORMER...
+================================================================================
+Alignment: None
+Space before: 189230
+Space after: 123190
+Line spacing: 127000
+Has math: False
+
+Runs (7 total):
+  Run 0: font=None            size=10.0pt   text='4.2.1 '
+  Run 1: font=None            size=10.0pt   text='V'
+  Run 2: font=None            size=8.0pt    text='IDEO'
+  Run 3: font=None            size=10.0pt   text=' D'
+  Run 4: font=None            size=8.0pt    text='IFFUSION'
+
+================================================================================
+PARAGRAPH 26: Diffusion transformer. The diffusion transformer mainly consists of th...
+================================================================================
+Alignment: CENTER (1)
+Space before: 0
+Space after: 0
+Line spacing: 138430
+Has math: True
+
+Runs (11 total):
+  Run 0: font=None            size=None     text='Diffusion transformer. The dif'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' the patchifying module, we us'
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text=' represents the sequence lengt'
+
+================================================================================
+PARAGRAPH 29: Figure 10: Transformer block of Wan....
+================================================================================
+Alignment: None
+Space before: 137160
+Space after: 175260
+Line spacing: 133350
+Has math: False
+
+Runs (3 total):
+  Run 0: font=None            size=10.0pt   text='Figure 10: Transformer block o'
+  Run 1: font=None            size=10.0pt   text=' Wan'
+  Run 2: font=None            size=10.0pt   text='.'
+
+================================================================================
+PARAGRAPH 31: experiments, we have demonstrated that this design can reduce the para...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 0
+Space after: 0
+Line spacing: 134620
+Has math: False
+
+Runs (4 total):
+  Run 0: font=None            size=10.0pt   text='experiments, we have demonstra'
+  Run 1: font=CMR10           size=10.0pt   text='25%'
+  Run 2: font=None            size=10.0pt   text=' and reveal a significant perf'
+  Run 3: font=None            size=10.0pt   text='scale.'
+
+================================================================================
+PARAGRAPH 32: Text encoder. Wan’s architecture uses the umT5 (Chung  ., 2023) to enc...
+================================================================================
+Alignment: None
+Space before: 77470
+Space after: 0
+Line spacing: 138430
+Has math: True
+
+Runs (9 total):
+  Run 0: font=None            size=None     text='Text encoder. Wan’s architectu'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' '
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text='., 2023) to encode input text.'
+
+================================================================================
+PARAGRAPH 34: leverage the flow matching framework (Lipman  ., 2022; Esser  ., 2024)...
+================================================================================
+Alignment: None
+Space before: 109220
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (12 total):
+  Run 0: font=None            size=None     text=''
+  Run 1: font=None            size=None     text=' leverage the flow matching fr'
+  Run 2: font=None            size=None     text=''
+  Run 3: font=None            size=None     text=' '
+  Run 4: font=None            size=None     text=''
+
+================================================================================
+PARAGRAPH 35: Training objective. Flow matching provides a theoretically grounded fr...
+================================================================================
+Alignment: None
+Space before: 73660
+Space after: 0
+Line spacing: 142240
+Has math: True
+
+Runs (21 total):
+  Run 0: font=None            size=None     text='Training objective. Flow match'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' circumvents iterative velocit'
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text=', a random noise '
+
+================================================================================
+PARAGRAPH 36: The groud truth velocity  is...
+================================================================================
+Alignment: None
+Space before: 0
+Space after: 0
+Line spacing: 265430
+Has math: True
+
+Runs (3 total):
+  Run 0: font=None            size=None     text='The groud truth velocity '
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' is'
+
+================================================================================
+PARAGRAPH 37: The model is trained to predict the velocity, thus, the loss function ...
+================================================================================
+Alignment: None
+Space before: 31750
+Space after: 0
+Line spacing: 147320
+Has math: True
+
+Runs (3 total):
+  Run 0: font=None            size=None     text='The model is trained to predic'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=','
+
+================================================================================
+PARAGRAPH 41: where  is the umT5 text embedding sequence of 512 tokens long,  is the...
+================================================================================
+Alignment: None
+Space before: 114300
+Space after: 0
+Line spacing: 128270
+Has math: True
+
+Runs (7 total):
+  Run 0: font=None            size=None     text='where '
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' is the umT5 text embedding se'
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text=' is the model weights, and '
+
+================================================================================
+PARAGRAPH 42: Image pre-training. Our experimental analysis reveals two critical cha...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 67310
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (7 total):
+  Run 0: font=None            size=None     text='Image pre-training. Our experi'
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' 720 video) substantially redu'
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text=' mitigate these issues, we ini'
+
+================================================================================
+PARAGRAPH 43: Image-video joint training. Following large-scale 256 px text-to-image...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 74930
+Space after: 0
+Line spacing: 139700
+Has math: False
+
+Runs (24 total):
+  Run 0: font=None            size=10.0pt   text='Image-video joint training.'
+  Run 1: font=None            size=10.0pt   text=' Following large-scale'
+  Run 2: font=CMR10           size=10.0pt   text=' 256'
+  Run 3: font=CMMI10          size=10.0pt   text=' px'
+  Run 4: font=None            size=10.0pt   text=' text-to-image pre-training, w'
+
+================================================================================
+PARAGRAPH 44: Pre-training configurations.  employ efficient training at bf16-mixed ...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 74930
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (5 total):
+  Run 0: font=None            size=None     text='Pre-training configurations. '
+  Run 1: font=None            size=None     text=''
+  Run 2: font=None            size=None     text=' employ efficient training at '
+  Run 3: font=None            size=None     text=''
+  Run 4: font=None            size=None     text=', 2014) optimizer with a weigh'
+
+================================================================================
+PARAGRAPH 46: the post-training stage, we maintain the same model architecture and o...
+================================================================================
+Alignment: JUSTIFY (3)
+Space before: 121920
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (4 total):
+  Run 0: font=None            size=None     text=''
+  Run 1: font=None            size=None     text=' the post-training stage, we m'
+  Run 2: font=None            size=None     text=''
+  Run 3: font=None            size=None     text=' conduct joint training at res'
+
+================================================================================
+PARAGRAPH 47: 4.3 MODEL SCALING AND TRAINING EFFICIENCY...
+================================================================================
+Alignment: None
+Space before: 234950
+Space after: 0
+Line spacing: 127000
+Has math: False
+
+Runs (9 total):
+  Run 0: font=None            size=10.0pt   text='4.3 '
+  Run 1: font=None            size=10.0pt   text='M'
+  Run 2: font=None            size=8.0pt    text='ODEL'
+  Run 3: font=None            size=10.0pt   text=' S'
+  Run 4: font=None            size=8.0pt    text='CALING AND'
+
+================================================================================
+PARAGRAPH 48: 4.3.1 WORKLOAD ANALYSIS...
+================================================================================
+Alignment: None
+Space before: 151130
+Space after: 0
+Line spacing: 127000
+Has math: False
+
+Runs (5 total):
+  Run 0: font=None            size=10.0pt   text='4.3.1 '
+  Run 1: font=None            size=10.0pt   text='W'
+  Run 2: font=None            size=8.0pt    text='ORKLOAD'
+  Run 3: font=None            size=10.0pt   text=' A'
+  Run 4: font=None            size=8.0pt    text='NALYSIS'
+
+================================================================================
+PARAGRAPH 49: Wan, the computational costs associated with the text encoder and VAE ...
+================================================================================
+Alignment: None
+Space before: 121920
+Space after: 0
+Line spacing: 139700
+Has math: True
+
+Runs (12 total):
+  Run 0: font=None            size=None     text=''
+  Run 1: font=None            size=None     text=' Wan, the computational costs '
+  Run 2: font=None            size=None     text=''
+  Run 3: font=None            size=None     text=', where L denotes the number o'
+  Run 4: font=None            size=None     text=''

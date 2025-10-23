@@ -1,0 +1,53 @@
+================================================================================
+SMALLPDF.DOCX FORMAT ANALYSIS
+================================================================================
+
+1. FONT SIZE DISTRIBUTION:
+--------------------------------------------------------------------------------
+    6.0pt:   13 runs (  7.0%)
+    7.0pt:    5 runs (  2.7%)
+   10.0pt:  139 runs ( 75.1%)
+   12.0pt:    1 runs (  0.5%)
+   13.5pt:   14 runs (  7.6%)
+   14.0pt:    1 runs (  0.5%)
+   17.0pt:   12 runs (  6.5%)
+
+  Most common: 10.0pt
+
+2. FONT NAME DISTRIBUTION:
+--------------------------------------------------------------------------------
+  Bookman Old Style: 128 runs (48.7%)
+  Book Antiqua: 62 runs (23.6%)
+  Courier New: 27 runs (10.3%)
+  Lucida Sans Unicode: 22 runs (8.4%)
+  Georgia: 21 runs (8.0%)
+
+3. PARAGRAPH DETAILS (First 50):
+--------------------------------------------------------------------------------
+[   0]  13.5pt          Courier New         None    3.6    N/A  259715.00 | WA N:	OPEN  AND  ADVANCED  LARGE-SCALE  VIDEO
+[   1]  17.0pt                  N/A         None    N/A    N/A  241300.00 | Generative Models
+[   3]  10.0pt                  N/A         None    0.1    N/A        N/A | Wan Team, Alibaba Group
+[   6]  12.0pt                  N/A   CENTER (1)    N/A    N/A        N/A | Abstract
+[  13]  14.0pt                  N/A         None    4.8    N/A        N/A | Contents
+[  16]   6.0pt                  N/A         None    3.8    N/A        N/A | Video frames	Ground Truth
+[  17]   6.0pt                  N/A         None    3.8    N/A        N/A | Mochi
+[  18]   6.0pt                  N/A         None    3.8    N/A        N/A | Hunyuan Video
+[  19]   6.0pt                  N/A         None    3.8    N/A        N/A | CogVideoX	Ours
+[  35]  10.0pt                  N/A         None    N/A    N/A        N/A | Model Training
+[  43]  10.0pt                  N/A         None    4.9    N/A        N/A | Video Diffusion Transformer
+[  71]  10.0pt                  N/A         None    N/A    N/A        N/A | Pre-training
+[  76]  10.0pt    Bookman Old Style         None    5.7    N/A        N/A | xt = tx1 + (1 − t)x0.	(1)
+[  80]  10.0pt    Bookman Old Style         None    N/A    N/A  187960.00 | v = dxt = x
+[  81]   7.0pt    Bookman Old Style         None    N/A    N/A  132715.00 | t	dt	1
+[  82]  10.0pt    Bookman Old Style         None   22.1    N/A        N/A | — x0.	(2)
+[  86]  10.0pt    Bookman Old Style         None    3.3    N/A  222250.00 | L = Ex ,x ,c	,t||u(xt, ctxt, t; θ) − vt||2,	(3) wh
+[  93]  10.0pt                  N/A         None    N/A    N/A        N/A | Post-training
+[  97]  10.0pt                  N/A         None    0.1    N/A        N/A | Model Scaling and Training Efficiency
+[  99]  10.0pt                  N/A         None    N/A    N/A        N/A | Workload Analysis
+
+4. SECTION HEADERS ANALYSIS:
+--------------------------------------------------------------------------------
+[  0]  13.5pt          Courier New         None | WA N:	OPEN  AND  ADVANCED  LARGE-SCALE  VIDEO
+
+5. FIGURE CAPTIONS ANALYSIS:
+--------------------------------------------------------------------------------
