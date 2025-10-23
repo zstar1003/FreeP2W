@@ -438,6 +438,20 @@ class HybridConverter:
                         text_before = para_text[:placeholder_pos].strip()
                         text_after = para_text[placeholder_pos + len(placeholder_id):].strip()
 
+                        # Remove equation number from text_after if present
+                        # (equation number is already in the table, no need to duplicate)
+                        if equation_number and text_after:
+                            import re
+                            # Remove all occurrences of equation number pattern
+                            pattern = re.escape(equation_number)
+                            # Remove pattern with surrounding whitespace/tabs (global replace)
+                            text_after = re.sub(r'[\s\t]*' + pattern + r'[\s\t]*', '', text_after)
+                            # Clean up any remaining tabs or excessive whitespace
+                            text_after = re.sub(r'\t+', ' ', text_after).strip()
+                            # If nothing left, set to empty
+                            if not text_after or text_after.isspace():
+                                text_after = ''
+
                         # Strip MathML declaration if present
                         if mathml.startswith('<?xml'):
                             mathml = mathml[mathml.index('?>') + 2:].strip()
@@ -452,11 +466,6 @@ class HybridConverter:
                             from docx.oxml import OxmlElement
                             from docx.oxml.ns import qn
                             from docx.enum.text import WD_ALIGN_PARAGRAPH
-
-                            # Extract text before and after the placeholder
-                            placeholder_pos = para_text.find(placeholder_id)
-                            text_before = para_text[:placeholder_pos].strip()
-                            text_after = para_text[placeholder_pos + len(placeholder_id):].strip()
 
                             # Create a table structure in XML (1 row, 3 columns)
                             # Column 1: Empty (balance)

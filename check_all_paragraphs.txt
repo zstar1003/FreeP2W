@@ -8,23 +8,23 @@ Para 33: '4.2.2 PRE-TRAINING'
 Para 34: 'We leverage the flow matching framework (Lipman et al., 2022; Esser et al., 2024) to model a unified denoising diffusion process across both image and video domains. We first conduct pre-training on low-resolution images, followed by multi-stage joint optimization of images and videos. The image-video joint training evolves using progressively upscaled data resolutions and extended temporal durations throughout the stages.'
 Para 35: 'Training objective. Flow matching provides a theoretically grounded framework for learning continuous-time generative processes in diffusion models. It circumvents iterative velocity prediction, enabling stable training via ordinary differential equations (ODEs) while maintaining equivalence to maximum likelihood objectives. During training, given an image or video latent x1, a random noise x0 ∼N(0, I), and a timestep t ∈[0, 1] sampled from a logit-normal distribution, an intermediate latent xt is obtained as the training input. Following Rectified Flows (RFs) (Esser et al., 2024), xt is defined as a linear interpolation between x0 and x1, i.e.,'
   [MATCH] Contains target keywords!
-Para 36: ''
-Para 37: 'The groud truth velocity vt is'
+Para 36: 'The groud truth velocity vt is'
   [MATCH] Contains target keywords!
-Para 38: 'The model is trained to predict the velocity, thus, the loss function can be formulated as the mean squared error (MSE) between the model output and vt,'
+Para 37: 'The model is trained to predict the velocity, thus, the loss function can be formulated as the mean squared error (MSE) between the model output and vt,'
   [MATCH] Contains target keywords!
-Para 39: '14'
+Para 38: '14'
+Para 39: ''
 Para 40: ''
-Para 41: ''
-Para 42: ''
-Para 43: 'where ctxt is the umT5 text embedding sequence of 512 tokens long, θ is the model weights, and u(xt, ctxt, t; θ) denotes the output velocity predicted by the model.'
+Para 41: 'where ctxt is the umT5 text embedding sequence of 512 tokens long, θ is the model weights, and u(xt, ctxt, t; θ) denotes the output velocity predicted by the model.'
   [MATCH] Contains target keywords!
-Para 44: 'Image pre-training. Our experimental analysis reveals two critical challenges in direct joint training with high-resolution images and long-duration video sequences: (1) Extended sequence lengths (typically 81 frames for 1280 × 720 video) substantially reduce training throughput. Under fixed GPU-hour budgets, this results in insufficient data throughput, thereby impeding model convergence rates. (2) Excessive GPU memory consumption forces suboptimal batch sizes, inducing training instability caused by spikes in gradient variance. To mitigate these issues, we initialize the 14B model training through low-resolution (256 px) text-to-image pre-training, enforcing cross-modal semantic-textual alignment and geometric structure fidelity before progressively introducing high-res video modalities.'
-Para 45: 'Image-video joint training. Following large-scale 256 px text-to-image pre-training, we implement staged joint-training with image and video data through a resolution-progressive curriculum. The training protocol comprises three distinct stages differentiated by spatial resolution areas: (1) In the first stage, we conduct joint training with 256 px resolution images and 5-second video clips (192 px resolution, 16 fps). (2) In the second stage, we initiate spatial resolution scaling by upgrading both image and video resolutions to 480px while maintaining a fixed 5-second video duration. (3) In the final phase, we escalate spatial resolution to 720px for both images and 5-second video clips.'
-Para 46: 'Pre-training configurations. We employ efficient training at bf16-mixed precision combined with the AdamW (Loshchilov & Hutter, 2017; Kingma & Ba, 2014) optimizer with a weight decay coefficient of 1e−3. The initial learning rate is set to 1e−4, and dynamically reduced triggered by plateaus of the FID and CLIP Score metrics.'
-Para 47: '4.2.3 POST-TRAINING'
-Para 48: 'In the post-training stage, we maintain the same model architecture and optimizer configuration from the pre-training stage, initializing the network with the pre-trained checkpoint. We conduct joint training at resolutions of 480px and 720px using the post-training video dataset detailed in Sec. 3.2.'
-Para 49: '4.3 MODEL SCALING AND TRAINING EFFICIENCY'
+Para 42: 'Image pre-training. Our experimental analysis reveals two critical challenges in direct joint training with high-resolution images and long-duration video sequences: (1) Extended sequence lengths (typically 81 frames for 1280 × 720 video) substantially reduce training throughput. Under fixed GPU-hour budgets, this results in insufficient data throughput, thereby impeding model convergence rates. (2) Excessive GPU memory consumption forces suboptimal batch sizes, inducing training instability caused by spikes in gradient variance. To mitigate these issues, we initialize the 14B model training through low-resolution (256 px) text-to-image pre-training, enforcing cross-modal semantic-textual alignment and geometric structure fidelity before progressively introducing high-res video modalities.'
+Para 43: 'Image-video joint training. Following large-scale 256 px text-to-image pre-training, we implement staged joint-training with image and video data through a resolution-progressive curriculum. The training protocol comprises three distinct stages differentiated by spatial resolution areas: (1) In the first stage, we conduct joint training with 256 px resolution images and 5-second video clips (192 px resolution, 16 fps). (2) In the second stage, we initiate spatial resolution scaling by upgrading both image and video resolutions to 480px while maintaining a fixed 5-second video duration. (3) In the final phase, we escalate spatial resolution to 720px for both images and 5-second video clips.'
+Para 44: 'Pre-training configurations. We employ efficient training at bf16-mixed precision combined with the AdamW (Loshchilov & Hutter, 2017; Kingma & Ba, 2014) optimizer with a weight decay coefficient of 1e−3. The initial learning rate is set to 1e−4, and dynamically reduced triggered by plateaus of the FID and CLIP Score metrics.'
+Para 45: '4.2.3 POST-TRAINING'
+Para 46: 'In the post-training stage, we maintain the same model architecture and optimizer configuration from the pre-training stage, initializing the network with the pre-trained checkpoint. We conduct joint training at resolutions of 480px and 720px using the post-training video dataset detailed in Sec. 3.2.'
+Para 47: '4.3 MODEL SCALING AND TRAINING EFFICIENCY'
+Para 48: '4.3.1 WORKLOAD ANALYSIS'
+Para 49: 'In Wan, the computational costs associated with the text encoder and VAE encoder are lower than those of the DiT model, which accounts for more than 85% of the overall computation during training. For the DiT model, the main computational cost is given by the expression L(αbsh2+βbs2h), where L denotes the number of DiT layers, b is the micro batch size, s indicates the sequence length, and h denotes the hidden dimension size. Here, α corresponds to the cost of the linear layers and β to that of the attention layer, for the non-causal attention used in Wan, β is 4 for the forward pass and 8 for the backward pass. Unlike general LLM models, the sequence length s processed by Wan often reaches hundreds of thousands or more. Since the computational cost of attention increases quadratically with the number of tokens, while the cost associated with the linear layers increases only linearly, the attention mechanism gradually becomes the training bottleneck. In scenarios where the sequence length reaches 1 million, the computation time for attention can account for up to 95% of the end-to-end training time.'
 
 ================================================================================
 Also checking tables...
@@ -731,3 +731,12 @@ Table 1:
   Row 57, Cell 9: 'Contributors'
   Row 57, Cell 10: 'Contributors'
   Row 57, Cell 11: '49'
+
+Table 2:
+  Row 0, Cell 2: '(1)'
+
+Table 3:
+  Row 0, Cell 2: '(2)'
+
+Table 4:
+  Row 0, Cell 2: '(3)'
