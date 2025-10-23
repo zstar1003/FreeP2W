@@ -1,0 +1,29 @@
+================================================================================
+SEARCHING FOR MATH EXPRESSIONS LIKE u(xt, ctxt, t; θ)
+================================================================================
+
+Paragraph 291:
+Text preview: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,...
+Math elements: 1
+
+  Math element 1:
+    Content: 'L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,'
+    Type: ✓ COMPLETE EXPRESSION
+
+Paragraph 293:
+Text preview: where ctxt is the umT5 text embedding sequence of 512 tokens long, θ is the model weights, and u(xt,ctxt,t;θ) denotes the output velocity predicted by...
+Math elements: 2
+
+  Math element 1:
+    Content: 'θ'
+    Type: Single symbol
+
+  Math element 2:
+    Content: 'u(xt,ctxt,t;θ)'
+    Type: ✓ COMPLETE EXPRESSION
+
+================================================================================
+SUMMARY: Found 2 complete math expressions
+================================================================================
+1. 'L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,'
+2. 'u(xt,ctxt,t;θ)'

@@ -666,7 +666,7 @@ class HybridConverter:
 
     def _process_inline_math(self, docx_path):
         """
-        Process inline math symbols in paragraph text and convert to OMML
+        Process inline math symbols and expressions in paragraph text and convert to OMML
 
         Args:
             docx_path: Path to DOCX file
@@ -676,7 +676,7 @@ class HybridConverter:
         from docx.oxml.ns import qn
         import re
 
-        print("\n[InlineMath] Processing inline math symbols...")
+        print("\n[InlineMath] Processing inline math symbols and expressions...")
 
         doc = Document(docx_path)
 
@@ -736,57 +736,157 @@ class HybridConverter:
 
         # Count how many paragraphs we process
         processed_count = 0
+        expression_count = 0
+        symbol_count = 0
 
         for para in doc.paragraphs:
             text = para.text
 
-            # Check if paragraph contains any math symbols
+            # Check if paragraph contains any math symbols or expressions
             has_math = any(symbol in text for symbol in math_symbols.keys())
 
-            if has_math:
+            # Also check for math expression patterns
+            has_expressions = bool(re.search(r'[a-zA-Z]+\([^)]*[θαβγδεζηικλμνξοπρστυφχψω∈×∼][^)]*\)', text))
+
+            if has_math or has_expressions:
                 # Process this paragraph
-                self._convert_inline_math_in_paragraph(para, math_symbols)
+                expr_count, sym_count = self._convert_inline_math_in_paragraph(para, math_symbols)
+                expression_count += expr_count
+                symbol_count += sym_count
                 processed_count += 1
 
-        print(f"[InlineMath] Processed {processed_count} paragraphs with inline math")
+        print(f"[InlineMath] Processed {processed_count} paragraphs")
+        print(f"[InlineMath] - {expression_count} complete math expressions")
+        print(f"[InlineMath] - {symbol_count} individual symbols")
 
         # Save document
         doc.save(docx_path)
 
     def _convert_inline_math_in_paragraph(self, para, math_symbols):
         """
-        Convert inline math symbols in a paragraph to OMML format
+        Convert inline math symbols and expressions in a paragraph to OMML format
 
         Args:
             para: docx.paragraph.Paragraph object
             math_symbols: Dictionary of symbol -> (name, latex) mappings
+
+        Returns:
+            tuple: (expression_count, symbol_count)
         """
         from docx.oxml import OxmlElement, parse_xml
         from docx.oxml.ns import qn
+        import re
 
         # Get paragraph text
         text = para.text
 
-        # Find all math symbols and their positions
-        symbol_positions = []
+        math_items = []  # List of (start_pos, end_pos, text, type)
+
+        # Step 1: Find all complete math expressions
+        # Define multiple expression patterns
+
+        # Pattern 1a: Distribution expressions like "x0 ∼N(0, I)"
+        # Match: variable + ∼ + function with parentheses
+        dist_func_pattern = r'\b[a-zA-Z][a-zA-Z0-9]*\s*∼\s*[A-Z][a-zA-Z]*\([^)]{0,50}\)'
+        for match in re.finditer(dist_func_pattern, text):
+            start, end = match.span()
+            expr_text = match.group()
+            math_items.append((start, end, expr_text, 'expression'))
+
+        # Pattern 1b: Set membership with ranges like "t ∈[0, 1]"
+        # Match: variable + ∈ + [range]
+        set_range_pattern = r'\b[a-zA-Z][a-zA-Z0-9]*\s*∈\s*\[[^\]]{0,50}\]'
+        for match in re.finditer(set_range_pattern, text):
+            start, end = match.span()
+            expr_text = match.group()
+            # Check if not already covered
+            if not any(s <= start < e for s, e, _, _ in math_items):
+                math_items.append((start, end, expr_text, 'expression'))
+
+        # Pattern 1c: Set membership with space like "x ∈R1+T/4×H/8×W/8"
+        # Match: variable + ∈ + complex expression with math symbols
+        set_expr_pattern = r'\b[a-zA-Z][a-zA-Z0-9]*\s*∈\s*[A-Z][A-Za-z0-9\+\-\*/×÷\{\}]{2,60}'
+        for match in re.finditer(set_expr_pattern, text):
+            start, end = match.span()
+            expr_text = match.group()
+            # Check if not already covered
+            if not any(s <= start < e for s, e, _, _ in math_items):
+                # Trim at common delimiters
+                expr_text = re.split(r'[,;\.]\s', expr_text)[0]
+                end = start + len(expr_text)
+                math_items.append((start, end, expr_text, 'expression'))
+
+        # Pattern 2: Function calls with math symbols like "u(xt, ctxt, t; θ)"
+        func_pattern = r'\b[a-zA-Z_]+\([^)]{0,100}[θαβγδεζηικλμνξοπρστυφχψω∈×∼∀∃∇∂∫∑∏±÷≤≥≠≈∞→←][^)]{0,100}\)'
+        for match in re.finditer(func_pattern, text):
+            start, end = match.span()
+            expr_text = match.group()
+            # Check if not already covered
+            if not any(s <= start < e for s, e, _, _ in math_items):
+                math_items.append((start, end, expr_text, 'expression'))
+
+        # Pattern 3: Equations with math symbols like "xt = tx1 + (1-t)x0"
+        # Match: variable = expression with math symbols (but stop at sentence boundaries)
+        eq_pattern = r'\b[a-zA-Z][a-zA-Z0-9]*\s*=\s*[^\.,;]{1,80}[θαβγδεζηικλμνξοπρστυφχψω∈×∼∀∃∇∂∫∑∏±÷≤≥≠≈∞→←−][^\.,;]{0,20}'
+        for match in re.finditer(eq_pattern, text):
+            start, end = match.span()
+            expr_text = match.group()
+            # Check if not already covered and not too long
+            if not any(s <= start < e for s, e, _, _ in math_items) and len(expr_text) < 100:
+                # Trim at sentence boundaries or common words
+                expr_text = re.split(r'[,;\.]\s+(?=[A-Z])', expr_text)[0]  # Stop at ". Word"
+
+                # Stop before common connecting words
+                common_words = r'\b(where|and|or|is|are|was|were|represents|denotes|indicates|means|such|that|which|with|for|from|to|in|on|at|by|as)\b'
+                match_word = re.search(common_words, expr_text)
+                if match_word:
+                    expr_text = expr_text[:match_word.start()].rstrip()
+
+                expr_text = expr_text.rstrip('.,;: ')
+                end = start + len(expr_text)
+                if len(expr_text) > 0:
+                    math_items.append((start, end, expr_text, 'expression'))
+
+        # Step 2: Find individual math symbols (not already in expressions)
         for symbol in math_symbols.keys():
             pos = 0
             while True:
                 pos = text.find(symbol, pos)
                 if pos == -1:
                     break
-                symbol_positions.append((pos, symbol))
+
+                # Check if this symbol is already part of an expression
+                in_expression = False
+                for item_start, item_end, _, item_type in math_items:
+                    if item_type == 'expression' and item_start <= pos < item_end:
+                        in_expression = True
+                        break
+
+                if not in_expression:
+                    math_items.append((pos, pos + len(symbol), symbol, 'symbol'))
+
                 pos += 1
 
-        # If no symbols, return
-        if not symbol_positions:
-            return
+        # If no math items, return
+        if not math_items:
+            return 0, 0
 
         # Sort by position
-        symbol_positions.sort(key=lambda x: x[0])
+        math_items.sort(key=lambda x: x[0])
+
+        # Remove overlapping items (keep the first one)
+        filtered_items = []
+        last_end = -1
+        for start, end, content, item_type in math_items:
+            if start >= last_end:
+                filtered_items.append((start, end, content, item_type))
+                last_end = end
+
+        # Count items
+        expression_count = sum(1 for _, _, _, t in filtered_items if t == 'expression')
+        symbol_count = sum(1 for _, _, _, t in filtered_items if t == 'symbol')
 
         # Build new paragraph content with math runs
-        # We need to rebuild the paragraph from scratch
         parent = para._element.getparent()
         para_index = parent.index(para._element)
 
@@ -800,10 +900,10 @@ class HybridConverter:
 
         # Build runs: text segments + math runs
         last_pos = 0
-        for pos, symbol in symbol_positions:
-            # Add text before symbol
-            if pos > last_pos:
-                text_before = text[last_pos:pos]
+        for start, end, content, item_type in filtered_items:
+            # Add text before this math item
+            if start > last_pos:
+                text_before = text[last_pos:start]
                 text_run = OxmlElement('w:r')
                 text_elem = OxmlElement('w:t')
                 text_elem.set(qn('xml:space'), 'preserve')
@@ -811,12 +911,16 @@ class HybridConverter:
                 text_run.append(text_elem)
                 new_para.append(text_run)
 
-            # Add math run for symbol
-            math_run = self._create_inline_math_run(symbol)
+            # Add math run
+            if item_type == 'expression':
+                math_run = self._create_inline_math_expression(content)
+            else:  # symbol
+                math_run = self._create_inline_math_run(content)
+
             if math_run is not None:
                 new_para.append(math_run)
 
-            last_pos = pos + len(symbol)
+            last_pos = end
 
         # Add remaining text
         if last_pos < len(text):
@@ -831,6 +935,82 @@ class HybridConverter:
         # Replace old paragraph with new one
         parent.insert(para_index, new_para)
         parent.remove(para._element)
+
+        return expression_count, symbol_count
+
+    def _create_inline_math_expression(self, expr_text):
+        """
+        Create an inline math run (OMML) for a complete expression like u(xt, ctxt, t; θ)
+
+        Args:
+            expr_text: Expression string like "u(xt, ctxt, t; θ)"
+
+        Returns:
+            OxmlElement (w:r with m:oMath) or None
+        """
+        from docx.oxml import OxmlElement, parse_xml
+        from docx.oxml.ns import qn
+        import re
+
+        try:
+            # Parse the expression to identify parts
+            # For now, we'll create a simple OMML with proper formatting
+            # Split into function name and arguments
+            match = re.match(r'([a-zA-Z_]+)\(([^)]+)\)', expr_text)
+            if not match:
+                # Fallback: treat as simple text
+                return self._create_inline_math_run(expr_text)
+
+            func_name = match.group(1)
+            args = match.group(2)
+
+            # Build OMML for function call: func(args)
+            # We'll use m:func structure or just create simple runs
+
+            # Start building OMML content
+            omml_parts = []
+
+            # Function name
+            omml_parts.append(f'<m:r><m:t>{func_name}</m:t></m:r>')
+
+            # Opening parenthesis
+            omml_parts.append('<m:r><m:t>(</m:t></m:r>')
+
+            # Process arguments - split by comma and semicolon
+            # For variables with subscripts (like xt, ctxt), we should detect them
+            # But for now, let's just render them as-is
+            arg_parts = re.split(r'([,;])', args)
+            for part in arg_parts:
+                part = part.strip()
+                if part:
+                    # Check if this part contains subscript pattern (letter followed by letters/numbers)
+                    # e.g., "xt" could be x_t, "ctxt" could be c_txt
+                    # For now, render as-is
+                    omml_parts.append(f'<m:r><m:t>{part}</m:t></m:r>')
+
+            # Closing parenthesis
+            omml_parts.append('<m:r><m:t>)</m:t></m:r>')
+
+            # Combine all parts
+            omml_content = ''.join(omml_parts)
+
+            # Remove whitespace between tags
+            omml_content = re.sub(r'>\s+<', '><', omml_content)
+
+            # Create OMML run
+            omml_xml = (
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+                'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">'
+                f'<m:oMath>{omml_content}</m:oMath>'
+                '</w:r>'
+            )
+
+            omml_elem = parse_xml(omml_xml)
+            return omml_elem
+
+        except Exception as e:
+            print(f"[Warning] Failed to create inline math expression for '{expr_text}': {e}")
+            return None
 
     def _create_inline_math_run(self, symbol):
         """
