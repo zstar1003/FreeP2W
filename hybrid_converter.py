@@ -737,6 +737,7 @@ class HybridConverter:
         # Count how many paragraphs we process
         processed_count = 0
         expression_count = 0
+        subscript_count = 0
         symbol_count = 0
 
         for para in doc.paragraphs:
@@ -748,15 +749,20 @@ class HybridConverter:
             # Also check for math expression patterns
             has_expressions = bool(re.search(r'[a-zA-Z]+\([^)]*[θαβγδεζηικλμνξοπρστυφχψω∈×∼][^)]*\)', text))
 
-            if has_math or has_expressions:
+            # Check for subscript patterns
+            has_subscripts = bool(re.search(r'\b[a-zA-Z][0-9t]\b', text))
+
+            if has_math or has_expressions or has_subscripts:
                 # Process this paragraph
                 expr_count, sym_count = self._convert_inline_math_in_paragraph(para, math_symbols)
+                # expr_count now includes both expressions and subscripts
+                # We'll count subscripts separately in the detailed output
                 expression_count += expr_count
                 symbol_count += sym_count
                 processed_count += 1
 
         print(f"[InlineMath] Processed {processed_count} paragraphs")
-        print(f"[InlineMath] - {expression_count} complete math expressions")
+        print(f"[InlineMath] - {expression_count} math expressions (including subscripts)")
         print(f"[InlineMath] - {symbol_count} individual symbols")
 
         # Save document
@@ -847,7 +853,60 @@ class HybridConverter:
                 if len(expr_text) > 0:
                     math_items.append((start, end, expr_text, 'expression'))
 
-        # Step 2: Find individual math symbols (not already in expressions)
+        # Step 2: Find subscript patterns like x0, x1, xt, ctxt
+        # Pattern: single letter + digits/letters (subscript)
+        # Be careful not to match technical terms like HTML5, T5-small, etc.
+
+        # Pattern 2a: Single letter + numbers (x0, x1, x2)
+        subscript_pattern = r'\b([a-zA-Zα-ωΑ-Ω])([0-9]+)\b'
+        for match in re.finditer(subscript_pattern, text):
+            start, end = match.span()
+            # Check if not already covered
+            if not any(s <= start < e for s, e, _, _ in math_items):
+                base = match.group(1)
+                subscript = match.group(2)
+
+                # Skip common technical terms
+                full_text = match.group(0)
+                if full_text.lower() in ['t5', 'h264', 'h265', 'utf8', 'base64', 'md5', 'sha256']:
+                    continue
+
+                math_items.append((start, end, f"{base}_{subscript}", 'subscript'))
+
+        # Pattern 2b: Single letter + letter (xt means x_t, vt means v_t)
+        subscript_letter_pattern = r'\b([a-zA-Z])([a-z])\b'
+        for match in re.finditer(subscript_letter_pattern, text):
+            start, end = match.span()
+            # Check if not already covered
+            if not any(s <= start < e for s, e, _, _ in math_items):
+                base = match.group(1)
+                subscript = match.group(2)
+                full_text = match.group(0)
+
+                # Only if both are lowercase or first is uppercase
+                # Skip common words like "is", "it", "at", "in", "on", "to", etc.
+                if full_text in ['is', 'it', 'at', 'in', 'on', 'to', 'of', 'or', 'an', 'as', 'be', 'by', 'he', 'we', 'if', 'so', 'up', 'no']:
+                    continue
+
+                # Only if looks like a variable (short and mathematical context)
+                if len(full_text) == 2:
+                    math_items.append((start, end, f"{base}_{subscript}", 'subscript'))
+
+        # Pattern 2c: Multi-letter variable + letter subscript (ctxt means c_{txt})
+        multi_subscript_pattern = r'\b([a-z]{1,3})([a-z]{1,3})\b'
+        for match in re.finditer(multi_subscript_pattern, text):
+            start, end = match.span()
+            full_text = match.group(0)
+
+            # Only process specific known patterns from the context
+            if full_text in ['ctxt']:  # Add more as needed
+                # Check if not already covered
+                if not any(s <= start < e for s, e, _, _ in math_items):
+                    base = match.group(1)
+                    subscript = match.group(2)
+                    math_items.append((start, end, f"{base}_{subscript}", 'subscript'))
+
+        # Step 3: Find individual math symbols (not already in expressions)
         for symbol in math_symbols.keys():
             pos = 0
             while True:
@@ -858,7 +917,7 @@ class HybridConverter:
                 # Check if this symbol is already part of an expression
                 in_expression = False
                 for item_start, item_end, _, item_type in math_items:
-                    if item_type == 'expression' and item_start <= pos < item_end:
+                    if item_start <= pos < item_end:
                         in_expression = True
                         break
 
@@ -884,6 +943,7 @@ class HybridConverter:
 
         # Count items
         expression_count = sum(1 for _, _, _, t in filtered_items if t == 'expression')
+        subscript_count = sum(1 for _, _, _, t in filtered_items if t == 'subscript')
         symbol_count = sum(1 for _, _, _, t in filtered_items if t == 'symbol')
 
         # Build new paragraph content with math runs
@@ -914,6 +974,8 @@ class HybridConverter:
             # Add math run
             if item_type == 'expression':
                 math_run = self._create_inline_math_expression(content)
+            elif item_type == 'subscript':
+                math_run = self._create_subscript_math(content)
             else:  # symbol
                 math_run = self._create_inline_math_run(content)
 
@@ -936,7 +998,7 @@ class HybridConverter:
         parent.insert(para_index, new_para)
         parent.remove(para._element)
 
-        return expression_count, symbol_count
+        return expression_count + subscript_count, symbol_count
 
     def _create_inline_math_expression(self, expr_text):
         """
@@ -1010,6 +1072,57 @@ class HybridConverter:
 
         except Exception as e:
             print(f"[Warning] Failed to create inline math expression for '{expr_text}': {e}")
+            return None
+
+    def _create_subscript_math(self, subscript_text):
+        """
+        Create an inline math run (OMML) for subscript like x_0, v_t, c_{txt}
+
+        Args:
+            subscript_text: Subscript string in format "base_subscript" (e.g., "x_0", "v_t")
+
+        Returns:
+            OxmlElement (w:r with m:oMath containing m:sSub) or None
+        """
+        from docx.oxml import parse_xml
+        import re
+
+        try:
+            # Parse the subscript notation
+            parts = subscript_text.split('_')
+            if len(parts) != 2:
+                return self._create_inline_math_run(subscript_text)
+
+            base, subscript = parts
+
+            # Build OMML subscript structure
+            # <m:sSub> = subscript element
+            #   <m:e> = base element
+            #   <m:sub> = subscript element
+
+            omml_content = (
+                f'<m:sSub>'
+                f'<m:e><m:r><m:t>{base}</m:t></m:r></m:e>'
+                f'<m:sub><m:r><m:t>{subscript}</m:t></m:r></m:sub>'
+                f'</m:sSub>'
+            )
+
+            # Remove whitespace between tags
+            omml_content = re.sub(r'>\s+<', '><', omml_content)
+
+            # Create OMML run
+            omml_xml = (
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+                'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">'
+                f'<m:oMath>{omml_content}</m:oMath>'
+                '</w:r>'
+            )
+
+            omml_elem = parse_xml(omml_xml)
+            return omml_elem
+
+        except Exception as e:
+            print(f"[Warning] Failed to create subscript math for '{subscript_text}': {e}")
             return None
 
     def _create_inline_math_run(self, symbol):

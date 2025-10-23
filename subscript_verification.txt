@@ -1,0 +1,56 @@
+================================================================================
+SUBSCRIPT RECOGNITION VERIFICATION
+================================================================================
+
+Total subscript elements found: 52
+
+1. e_t
+   Context: Figure 1: Comparison of Wan with state-of-the-art open-source and closed-source models. Following bo...
+
+2. a_l
+   Context: Figure 1: Comparison of Wan with state-of-the-art open-source and closed-source models. Following bo...
+
+3. I_n
+   Context: In Fig. 9, we present the architecture of Wan, which is designed based on the current mainstream DiT...
+
+4. I_n
+   Context: Diffusion transformer. The diffusion transformer mainly consists of three components: a patchifying ...
+
+5. e_m
+   Context: Diffusion transformer. The diffusion transformer mainly consists of three components: a patchifying ...
+
+6. e_t
+   Context: Diffusion transformer. The diffusion transformer mainly consists of three components: a patchifying ...
+
+7. a_l
+   Context: Diffusion transformer. The diffusion transformer mainly consists of three components: a patchifying ...
+
+8. e_t
+   Context: Text encoder. Wan’s architecture uses the umT5 (Chung et al., 2023) to encode input text. Through ex...
+
+9. a_l
+   Context: Text encoder. Wan’s architecture uses the umT5 (Chung et al., 2023) to encode input text. Through ex...
+
+10. I_t
+   Context: Text encoder. Wan’s architecture uses the umT5 (Chung et al., 2023) to encode input text. Through ex...
+
+11. I_t
+   Context: Text encoder. Wan’s architecture uses the umT5 (Chung et al., 2023) to encode input text. Through ex...
+
+12. W_e
+   Context: We leverage the flow matching framework (Lipman et al., 2022; Esser et al., 2024) to model a unified...
+
+13. e_t
+   Context: We leverage the flow matching framework (Lipman et al., 2022; Esser et al., 2024) to model a unified...
+
+14. a_l
+   Context: We leverage the flow matching framework (Lipman et al., 2022; Esser et al., 2024) to model a unified...
+
+15. e_t
+   Context: We leverage the flow matching framework (Lipman et al., 2022; Esser et al., 2024) to model a unified...
+
+================================================================================
+SAMPLE SUBSCRIPT XML STRUCTURE
+================================================================================
+<m:sSub xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-c
+...
