@@ -1,0 +1,8 @@
+Original hybrid:
+  Text: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,...
+  Math elements: 1
+
+After inline math:
+  Text: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,...
+  Math elements: 1
+

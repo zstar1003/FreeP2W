@@ -1,0 +1,56 @@
+================================================================================
+SUBSCRIPTS WITHIN EXPRESSIONS VERIFICATION
+================================================================================
+
+================================================================================
+TARGET 1: u(xt,ctxt,t;θ)
+================================================================================
+
+Paragraph: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,...
+Math elements: 1
+
+Math element 1:
+  Text: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,
+  Subscripts inside: 7
+    1. E_x
+    2. x_0
+    3. x_1
+    4. c_t
+    5. x_t
+    6. c_t
+    7. v_t
+  XML (first 300 chars): <m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmln...
+
+
+Paragraph: where ctxt is the umT5 text embedding sequence of 512 tokens long, θ is the model weights, and u(xt,ctxt,t;θ) denotes the output velocity predicted by...
+Math elements: 3
+
+Math element 1:
+  Text: ctxt
+  Subscripts inside: 1
+    1. ctx_t
+  XML (first 300 chars): <m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmln...
+
+Math element 3:
+  Text: u(xt,ctxt,t;θ)
+  Subscripts inside: 2
+    1. x_t
+    2. c_txt
+  XML (first 300 chars): <m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmln...
+
+
+================================================================================
+TARGET 2: x0 ∼N(0,I)
+================================================================================
+
+Paragraph: Training objective. Flow matching provides a theoretically grounded framework for learning continuous-time generative processes in diffusion models. I...
+Math elements: 10
+
+Math element 3:
+  Text: x0∼N(0,I)
+  Subscripts inside: 1
+    1. x_0
+Math element 9:
+  Text: x0
+  Subscripts inside: 1
+    1. x_0

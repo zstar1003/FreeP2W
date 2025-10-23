@@ -1,0 +1,17 @@
+Found paragraph: L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,...
+
+Total subscripts: 7
+
+1. E_x
+2. x_0
+3. x_1
+4. c_t
+5. x_t
+6. c_t
+7. v_t
+
+Full expression text:
+L=Ex0,x1,ctxt,t||u(xt,ctxt,t;θ)−vt||2,
+
+Occurrences of 'ctxt': 2
+Occurrences of 'xt': 3

@@ -1015,43 +1015,72 @@ class HybridConverter:
         import re
 
         try:
-            # Parse the expression to identify parts
-            # For now, we'll create a simple OMML with proper formatting
-            # Split into function name and arguments
-            match = re.match(r'([a-zA-Z_]+)\(([^)]+)\)', expr_text)
-            if not match:
-                # Fallback: treat as simple text
-                return self._create_inline_math_run(expr_text)
+            # Build OMML content by processing the expression text
+            # We need to identify and convert subscripts within the expression
 
-            func_name = match.group(1)
-            args = match.group(2)
-
-            # Build OMML for function call: func(args)
-            # We'll use m:func structure or just create simple runs
-
-            # Start building OMML content
             omml_parts = []
+            i = 0
+            text_len = len(expr_text)
 
-            # Function name
-            omml_parts.append(f'<m:r><m:t>{func_name}</m:t></m:r>')
+            while i < text_len:
+                # Try to match subscript patterns at current position
+                remaining = expr_text[i:]
 
-            # Opening parenthesis
-            omml_parts.append('<m:r><m:t>(</m:t></m:r>')
+                # Pattern 1: Multi-letter + multi-letter (ctxt -> c_{txt})
+                # Must check this FIRST before single letter patterns
+                match = re.match(r'^(c)(txt)(?![a-z])', remaining)
+                if match:
+                    base = match.group(1)
+                    subscript = match.group(2)
+                    # Create subscript OMML
+                    omml_parts.append(
+                        f'<m:sSub>'
+                        f'<m:e><m:r><m:t>{base}</m:t></m:r></m:e>'
+                        f'<m:sub><m:r><m:t>{subscript}</m:t></m:r></m:sub>'
+                        f'</m:sSub>'
+                    )
+                    i += len(match.group(0))
+                    continue
 
-            # Process arguments - split by comma and semicolon
-            # For variables with subscripts (like xt, ctxt), we should detect them
-            # But for now, let's just render them as-is
-            arg_parts = re.split(r'([,;])', args)
-            for part in arg_parts:
-                part = part.strip()
-                if part:
-                    # Check if this part contains subscript pattern (letter followed by letters/numbers)
-                    # e.g., "xt" could be x_t, "ctxt" could be c_txt
-                    # For now, render as-is
-                    omml_parts.append(f'<m:r><m:t>{part}</m:t></m:r>')
+                # Pattern 2: Single letter + digits (x0, x1)
+                match = re.match(r'^([a-zA-Zα-ωΑ-Ω])([0-9]+)', remaining)
+                if match:
+                    base = match.group(1)
+                    subscript = match.group(2)
+                    # Create subscript OMML
+                    omml_parts.append(
+                        f'<m:sSub>'
+                        f'<m:e><m:r><m:t>{base}</m:t></m:r></m:e>'
+                        f'<m:sub><m:r><m:t>{subscript}</m:t></m:r></m:sub>'
+                        f'</m:sSub>'
+                    )
+                    i += len(match.group(0))
+                    continue
 
-            # Closing parenthesis
-            omml_parts.append('<m:r><m:t>)</m:t></m:r>')
+                # Pattern 3: Single letter + single letter (xt, vt)
+                # But be careful with common words
+                match = re.match(r'^([a-zA-Z])([a-z])(?![a-z])', remaining)
+                if match:
+                    base = match.group(1)
+                    subscript = match.group(2)
+                    full = match.group(0)
+
+                    # Skip common words
+                    if full not in ['is', 'it', 'at', 'in', 'on', 'to', 'of', 'or', 'an', 'as', 'be', 'by']:
+                        # Create subscript OMML
+                        omml_parts.append(
+                            f'<m:sSub>'
+                            f'<m:e><m:r><m:t>{base}</m:t></m:r></m:e>'
+                            f'<m:sub><m:r><m:t>{subscript}</m:t></m:r></m:sub>'
+                            f'</m:sSub>'
+                        )
+                        i += len(match.group(0))
+                        continue
+
+                # No subscript pattern matched, add single character as text
+                char = expr_text[i]
+                omml_parts.append(f'<m:r><m:t>{char}</m:t></m:r>')
+                i += 1
 
             # Combine all parts
             omml_content = ''.join(omml_parts)
@@ -1072,6 +1101,8 @@ class HybridConverter:
 
         except Exception as e:
             print(f"[Warning] Failed to create inline math expression for '{expr_text}': {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _create_subscript_math(self, subscript_text):
