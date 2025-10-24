@@ -49,7 +49,7 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
     # 确定输出路径
     if output_path is None:
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
-        output_path = f"{base_name}_converted.docx"
+        output_path = f"{base_name}_converted_old.docx"
 
     try:
         # 导入转换器（延迟导入以加快启动速度）
@@ -64,6 +64,7 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
 
         try:
             from hybrid_converter import HybridConverter
+            from pdf2docx import Converter
             from post_format_english_body import format_english_body_text_improved
             from docx.enum.text import WD_ALIGN_PARAGRAPH
 
@@ -80,11 +81,15 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
             sys.stdout = io.StringIO()
             sys.stderr = io.StringIO()
 
-            converter = HybridConverter(
-                yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
-                unimernet_cfg_path="demo.yaml"
-            )
-            converter.convert(pdf_path=pdf_path, docx_path=temp_path)
+            # converter = HybridConverter(
+            #     yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
+            #     unimernet_cfg_path="demo.yaml"
+            # )
+
+            converter = Converter(pdf_path)
+
+            # converter.convert(pdf_path=pdf_path, docx_path=temp_path)
+            converter.convert(temp_path)
 
             sys.stdout = old_stdout
             sys.stderr = old_stderr
