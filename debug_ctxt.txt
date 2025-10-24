@@ -1,6 +1,0 @@
-
-[InlineMath] Processing inline math symbols and expressions...
-[DEBUG] Pattern 3 matched: 'xt' -> x_t at position 2, remaining: xt, ctxt, t; θ)
-[DEBUG] Pattern 1 matched: 'ctxt' -> c_txt in expression: u(xt, ctxt, t; θ)
-[DEBUG] Pattern 3 matched: 'sh' -> s_h at position 4, remaining: sh2+βbs2h)
-[DEBUG] Pattern 3 matched: 'bs' -> b_s at position 9, remaining: bs2h)
