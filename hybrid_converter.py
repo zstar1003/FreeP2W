@@ -400,7 +400,6 @@ class HybridConverter:
     def _replace_formula_placeholders(self, docx_path, formula_data):
         """
         Replace formula placeholder text with actual MathML formulas in DOCX file
-        IMPROVED VERSION: Preserves original run structure from pdf2docx
 
         Args:
             docx_path: Generated DOCX file
@@ -421,16 +420,12 @@ class HybridConverter:
                 formula_map[placeholder_id] = formula_info
 
         print(f"[Formula] Searching for {len(formula_map)} placeholder texts in document...")
-        print(f"[Formula] IMPROVED MODE: Preserving original run structure")
 
         replaced_count = 0
 
         # Iterate through all paragraphs
         for para_idx, para in enumerate(doc.paragraphs):
             para_text = para.text
-
-            # Record original run count for comparison
-            original_run_count = len(para.runs)
 
             # Look for formula placeholder pattern
             for placeholder_id, formula_info in formula_map.items():
@@ -439,29 +434,27 @@ class HybridConverter:
                     latex = formula_info['latex']
                     equation_number = formula_info.get('equation_number', None)
 
-                    print(f"  [Formula] Found placeholder '{placeholder_id}' at paragraph {para_idx}")
-                    print(f"    Original runs: {original_run_count}")
+                    print(f"  [Formula] Found placeholder '{placeholder_id}' at paragraph {para_idx}, replacing...")
 
                     try:
-                        # Find which run contains the placeholder
-                        run_idx, placeholder_run, start_pos = self._find_run_with_text(para, placeholder_id)
-
-                        if run_idx is None:
-                            print(f"    ✗ Could not locate placeholder in runs")
-                            continue
-
-                        print(f"    Located in run {run_idx} at position {start_pos}")
-
-                        # Get text before and after placeholder in this run
-                        run_text = placeholder_run.text
-                        text_before = run_text[:start_pos]
-                        text_after = run_text[start_pos + len(placeholder_id):]
+                        # Extract text before and after the placeholder
+                        placeholder_pos = para_text.find(placeholder_id)
+                        text_before = para_text[:placeholder_pos].strip()
+                        text_after = para_text[placeholder_pos + len(placeholder_id):].strip()
 
                         # Remove equation number from text_after if present
+                        # (equation number is already in the table, no need to duplicate)
                         if equation_number and text_after:
+                            import re
+                            # Remove all occurrences of equation number pattern
                             pattern = re.escape(equation_number)
+                            # Remove pattern with surrounding whitespace/tabs (global replace)
                             text_after = re.sub(r'[\s\t]*' + pattern + r'[\s\t]*', '', text_after)
+                            # Clean up any remaining tabs or excessive whitespace
                             text_after = re.sub(r'\t+', ' ', text_after).strip()
+                            # If nothing left, set to empty
+                            if not text_after or text_after.isspace():
+                                text_after = ''
 
                         # Strip MathML declaration if present
                         if mathml.startswith('<?xml'):
@@ -614,36 +607,39 @@ class HybridConverter:
                             tbl.append(tr)
 
                             # Now insert the table into the document
-                            # IMPROVED: Preserve run structure by only modifying the specific run
                             parent = para._element.getparent()
                             para_index = parent.index(para._element)
 
-                            # Preserve formatting of the original run
-                            original_formatting = self._get_run_formatting(placeholder_run)
+                            if text_before:
+                                print(f"    [Info] Preserving text before formula: {text_before[:50]}...")
+                                # Keep the paragraph with text_before
+                                para.clear()
+                                para.add_run(text_before)
+                                # Insert table after this paragraph
+                                parent.insert(para_index + 1, tbl)
+                            else:
+                                # Replace the paragraph with the table
+                                para.clear()
+                                parent.insert(para_index, tbl)
+                                parent.remove(para._element)
 
-                            # Modify the current run to only contain text_before
-                            placeholder_run.text = text_before
-
-                            # If text_after exists, add it as a new run right after the current run
+                            # If there's text after the placeholder, add it as a new paragraph after the table
                             if text_after:
-                                print(f"    [Info] Preserving text after: {text_after[:50]}...")
-                                # Create new run with same formatting
-                                new_run = para.add_run(text_after)
-                                self._apply_run_formatting(new_run, original_formatting)
+                                print(f"    [Info] Preserving text after formula: {text_after[:50]}...")
+                                new_para = OxmlElement('w:p')
+                                new_run = OxmlElement('w:r')
+                                new_text = OxmlElement('w:t')
+                                new_text.text = text_after
+                                new_run.append(new_text)
+                                new_para.append(new_run)
 
-                                # Move the new run to the correct position (right after current run)
-                                runs_elements = para._element.findall(qn('w:r'))
-                                if len(runs_elements) > run_idx + 1:
-                                    last_run_elem = runs_elements[-1]
-                                    para._element.remove(last_run_elem)
-                                    para._element.insert(run_idx + 1, last_run_elem)
-
-                            # Insert table after this paragraph
-                            parent.insert(para_index + 1, tbl)
-
-                            # Report run preservation
-                            new_run_count = len(para.runs)
-                            print(f"    ✓ Preserved runs: {original_run_count} → {new_run_count} (delta: {new_run_count - original_run_count})")
+                                # Insert after table
+                                if text_before:
+                                    # Table was inserted at para_index + 1, so insert text_after at para_index + 2
+                                    parent.insert(para_index + 2, new_para)
+                                else:
+                                    # Table was inserted at para_index, so insert text_after at para_index + 1
+                                    parent.insert(para_index + 1, new_para)
 
                             replaced_count += 1
                             print(f"    ✓ Replaced with: {latex[:60]}...")
@@ -1359,64 +1355,6 @@ class HybridConverter:
             text = ''.join(mathml_elem.itertext())
             text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             return f'<m:r><m:t>{text}</m:t></m:r>'
-
-    def _find_run_with_text(self, para, text):
-        """
-        Find the run containing specific text within a paragraph
-
-        Args:
-            para: docx.paragraph.Paragraph object
-            text: Text to search for
-
-        Returns:
-            tuple: (run_index, run_object, start_position_in_run) or (None, None, None)
-        """
-        for run_idx, run in enumerate(para.runs):
-            run_text = run.text
-            if text in run_text:
-                start_pos = run_text.find(text)
-                return run_idx, run, start_pos
-        return None, None, None
-
-    def _get_run_formatting(self, run):
-        """
-        Extract formatting properties from a run
-
-        Args:
-            run: docx.text.run.Run object
-
-        Returns:
-            dict: Dictionary of formatting properties
-        """
-        return {
-            'font_name': run.font.name,
-            'font_size': run.font.size,
-            'bold': run.font.bold,
-            'italic': run.font.italic,
-            'underline': run.font.underline,
-            'color': run.font.color.rgb if run.font.color.rgb else None,
-        }
-
-    def _apply_run_formatting(self, run, formatting):
-        """
-        Apply formatting properties to a run
-
-        Args:
-            run: docx.text.run.Run object
-            formatting: Dictionary of formatting properties
-        """
-        if formatting.get('font_name'):
-            run.font.name = formatting['font_name']
-        if formatting.get('font_size'):
-            run.font.size = formatting['font_size']
-        if formatting.get('bold') is not None:
-            run.font.bold = formatting['bold']
-        if formatting.get('italic') is not None:
-            run.font.italic = formatting['italic']
-        if formatting.get('underline') is not None:
-            run.font.underline = formatting['underline']
-        if formatting.get('color'):
-            run.font.color.rgb = formatting['color']
 
     def _create_omml_from_mathml(self, mathml):
         """
