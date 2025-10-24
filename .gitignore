@@ -10,7 +10,6 @@ wheels/
 .venv
 
 test_files
-models
 results
 outputs
 weights

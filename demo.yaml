@@ -2,13 +2,13 @@ model:
   arch: unimernet
   model_type: unimernet
   model_config:
-    model_name: ./models/unimernet_small
+    model_name: ./weights/unimernet_small
     max_seq_len: 1536
 
   load_pretrained: True
-  pretrained: './models/unimernet_small/unimernet_small.pth'
+  pretrained: './weights/unimernet_small/unimernet_small.pth'
   tokenizer_config:
-    path: ./models/unimernet_small
+    path: ./weights/unimernet_small
 
 datasets:
   formula_rec_eval:
