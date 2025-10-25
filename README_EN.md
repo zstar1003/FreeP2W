@@ -1,5 +1,3 @@
-#FreeP2W
-
 <div align="center"> 
 <h4> 
 <a href="README.md">🇨🇳 Chinese</a> 
@@ -151,4 +149,3 @@ This project uses the following open source projects:
 - [PyMuPDF](https://github.com/pymupdf/PyMuPDF) - PDF document processing
 
 Thanks to these excellent open source projects!
-

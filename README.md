@@ -1,5 +1,3 @@
-# FreeP2W 
-
 <div align="center">
   <h4>
     <a href="README.md">🇨🇳 中文</a>
