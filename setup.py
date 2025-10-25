@@ -23,7 +23,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/zstar1003/FreeP2W",
-    packages=find_packages(),
+    packages=find_packages(include=['freep2w', 'freep2w.*', 'doclayout_yolo', 'doclayout_yolo.*', 'pdf2docx', 'pdf2docx.*', 'unimernet', 'unimernet.*']),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

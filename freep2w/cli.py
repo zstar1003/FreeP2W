@@ -7,6 +7,13 @@ import sys
 import os
 import warnings
 import logging
+from pathlib import Path
+
+# Add project root to sys.path to ensure local modules are found
+# This is necessary when running via entry point
+project_root = Path(__file__).parent.parent.absolute()
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 # 禁用所有警告
 warnings.filterwarnings('ignore')
@@ -41,6 +48,22 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
         pdf_path: PDF 文件路径
         output_path: 输出 DOCX 路径（可选）
     """
+
+    # 自动检查并下载模型
+    yolo_path = None
+    cfg_path = None
+    try:
+        from .model_downloader import check_and_download_models
+        print_info("正在检查模型文件...")
+        yolo_path, cfg_path = check_and_download_models()
+        print(f"[DEBUG] YOLO路径: {yolo_path}")
+        print(f"[DEBUG] 配置路径: {cfg_path}")
+    except Exception as e:
+        print(f"[警告] 模型检查失败: {e}")
+        print("[INFO] 将使用默认路径继续...")
+        import traceback
+        traceback.print_exc()
+    
     # 验证输入文件
     if not os.path.exists(pdf_path):
         print(f"[错误] PDF 文件不存在: {pdf_path}")
@@ -72,14 +95,23 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
 
             print_info("开始转换 PDF...")
 
-            # 转换 PDF（直接输出到最终文件）
+            # 转换 PDF（使用下载的模型路径）
             sys.stdout = io.StringIO()
             sys.stderr = io.StringIO()
 
-            converter = HybridConverter(
-                yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
-                unimernet_cfg_path="demo.yaml"
-            )
+            # 使用下载的模型路径，如果没有则使用默认相对路径
+            if yolo_path and cfg_path:
+                converter = HybridConverter(
+                    yolo_model_path=yolo_path,
+                    unimernet_cfg_path=cfg_path
+                )
+            else:
+                # Fallback: 使用项目目录的相对路径
+                converter = HybridConverter(
+                    yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
+                    unimernet_cfg_path="demo.yaml"
+                )
+
             converter.convert(pdf_path=pdf_path, docx_path=output_path)
 
             # converter = Converter(pdf_path)

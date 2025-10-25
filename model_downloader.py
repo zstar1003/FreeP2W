@@ -43,20 +43,13 @@ def check_and_download_models():
     # Check YOLO model
     yolo_model = model_dir / "doclayout_yolo_docstructbench_imgsz1024.pt"
     if not yolo_model.exists():
-        print("[WARNING] YOLO 模型未找到")
-        print("[INFO] 请手动下载模型文件到:", model_dir)
-        print("[INFO] YOLO 模型: https://github.com/opendatalab/DocLayout-YOLO/releases")
-        # 如果您有模型托管地址，可以在这里自动下载：
-        # download_file(YOLO_MODEL_URL, yolo_model, "下载 YOLO 模型")
+        YOLO_MODEL_URL = "https://github.com/zstar1003/FreeP2W/releases/download/v0.0.1/doclayout_yolo_docstructbench_imgsz1024.pt"
+        download_file(YOLO_MODEL_URL, yolo_model, "下载 YOLO 模型")
 
     # Check UniMERNet model
     unimernet_dir = model_dir / "unimernet_small"
     if not unimernet_dir.exists():
-        print("[WARNING] UniMERNet 模型未找到")
-        print("[INFO] 请手动下载模型文件到:", model_dir)
-        print("[INFO] UniMERNet 模型: https://huggingface.co/wanderkid/unimernet_small")
-        # 如果您有模型托管地址，可以在这里自动下载：
-        # download_unimernet_model(unimernet_dir)
+        download_unimernet_model(unimernet_dir)
 
     # Check config file
     demo_yaml = model_dir / "demo.yaml"
@@ -70,21 +63,15 @@ def check_and_download_models():
 
 
 def download_unimernet_model(dest_dir):
-    """
-    Download UniMERNet model from Hugging Face or other source
-    TODO: Implement this if you host the model somewhere
-    """
     print("[INFO] 自动下载 UniMERNet 模型...")
-    # Example implementation:
-    # url = "https://your-hosted-location/unimernet_small.zip"
-    # zip_path = dest_dir.parent / "unimernet_small.zip"
-    # download_file(url, zip_path, "下载 UniMERNet 模型")
-    #
-    # with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-    #     zip_ref.extractall(dest_dir.parent)
-    #
-    # zip_path.unlink()
-    pass
+    url = "https://github.com/zstar1003/FreeP2W/releases/download/v0.0.1/unimernet_small.zip"
+    zip_path = dest_dir.parent / "unimernet_small.zip"
+    download_file(url, zip_path, "下载 UniMERNet 模型")
+    
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(dest_dir.parent)
+    
+    zip_path.unlink()
 
 
 if __name__ == "__main__":
