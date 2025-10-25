@@ -1,9 +1,12 @@
-# Include model files and configs
-include weights/*.pt
-include demo.yaml
+# Include documentation and requirements
 include requirements.txt
 include LICENSE
 include README.md
+
+# Include configuration files from all packages
+include freep2w/*.yaml
+recursive-include doclayout_yolo/cfg *.yaml
+recursive-include unimernet/configs *.yaml
 
 # Exclude build artifacts
 exclude build_exe.bat
@@ -12,3 +15,6 @@ exclude freep2w.spec
 global-exclude __pycache__
 global-exclude *.py[co]
 global-exclude .DS_Store
+
+# Note: Model weight files should NOT be included in PyPI package
+# They will be auto-downloaded from GitHub Releases on first run

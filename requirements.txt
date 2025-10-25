@@ -47,6 +47,7 @@ jeepney==0.9.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x' a
 jinja2==3.1.6
 keyring==25.6.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
 kiwisolver==1.4.9
+latex2mathml==3.78.0
 lxml==6.0.2
 macholib==1.16.3 ; sys_platform == 'darwin'
 markdown-it-py==4.0.0
@@ -85,6 +86,7 @@ pillow==10.4.0
 portalocker==3.2.0
 propcache==0.4.1
 psutil==7.1.1
+py-cpuinfo==9.0.0
 pyarrow==21.0.0
 pycparser==2.23 ; implementation_name != 'PyPy' and platform_machine != 'ppc64le' and platform_machine != 's390x' and platform_python_implementation != 'PyPy' and sys_platform == 'linux'
 pydantic==2.12.3

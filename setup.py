@@ -16,7 +16,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="freep2w",
-    version="1.0.0",
+    version="1.0.3",
     author="zstar",
     author_email="zstar1003@163.com",
     description="Free PDF to Word Converter with formula recognition",
@@ -47,8 +47,15 @@ setup(
     },
     package_data={
         "freep2w": [
-            "weights/*.pt",
             "*.yaml",
+        ],
+        "doclayout_yolo": [
+            "cfg/*.yaml",
+            "cfg/**/*.yaml",
+        ],
+        "unimernet": [
+            "configs/*.yaml",
+            "configs/**/*.yaml",
         ],
     },
     include_package_data=True,

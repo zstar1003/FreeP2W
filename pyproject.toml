@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "freep2w"
-version = "1.0.0"
+version = "1.0.3"
 description = "Free PDF to Word Converter"
 readme = "README.md"
 authors = [
@@ -29,6 +29,7 @@ dependencies = [
     "fire==0.7.1",
     "fonttools==4.60.1",
     "lxml==6.0.2",
+    "latex2mathml>=3.78.0",
     "opencv-python-headless==4.11.0.86",
     "python-docx==1.2.0",
     "termcolor==3.1.0",
@@ -36,6 +37,7 @@ dependencies = [
     "torch>=2.0.0",
     "torchvision>=0.15.0",
     "psutil>=5.9.0",
+    "py-cpuinfo>=9.0.0",
     "matplotlib>=3.5.0",
     "pandas>=2.0.0",
     "pymupdf>=1.23.0",
@@ -68,7 +70,9 @@ freep2w = "freep2w.cli:main"
 packages = {find = {where = ["."], include = ["freep2w", "freep2w.*", "doclayout_yolo", "doclayout_yolo.*", "pdf2docx", "pdf2docx.*", "unimernet", "unimernet.*"]}}
 
 [tool.setuptools.package-data]
-freep2w = ["weights/*.pt", "*.yaml"]
+freep2w = ["*.yaml"]
+doclayout_yolo = ["cfg/*.yaml", "cfg/**/*.yaml"]
+unimernet = ["configs/*.yaml", "configs/**/*.yaml"]
 
 [tool.uv.sources]
 torch = [
