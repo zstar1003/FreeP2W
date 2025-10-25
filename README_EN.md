@@ -1,9 +1,5 @@
 #FreeP2W
 
-![python-version](README_EN.assets/Python-3.8+-blue.svg)
-[![PyPI](README_EN.assets/PyPI-v1.0.0-orange.svg)](https://pypi.org/project/freep2w/)
-[![License](README_EN.assets/License-MIT-green.svg)](LICENSE)
-
 <div align="center"> 
 <h4> 
 <a href="README.md">🇨🇳 Chinese</a> 
@@ -156,8 +152,3 @@ This project uses the following open source projects:
 
 Thanks to these excellent open source projects!
 
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
