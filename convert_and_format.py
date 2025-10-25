@@ -11,7 +11,7 @@
 import sys
 import os
 from hybrid_converter import HybridConverter
-from pdf2docx_origin import Converter
+from pdf2docx import Converter
 
 
 def convert_and_format(pdf_path, final_output_path,

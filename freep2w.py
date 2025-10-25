@@ -49,7 +49,7 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
     # 确定输出路径
     if output_path is None:
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
-        output_path = f"{base_name}_converted_old.docx"
+        output_path = f"{base_name}_converted.docx"
 
     try:
         # 导入转换器（延迟导入以加快启动速度）
@@ -65,8 +65,6 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
         try:
             from hybrid_converter import HybridConverter
             from pdf2docx import Converter
-            from post_format_english_body import format_english_body_text_improved
-            from docx.enum.text import WD_ALIGN_PARAGRAPH
 
             # 恢复输出
             sys.stdout = old_stdout
@@ -74,49 +72,23 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
 
             print_info("开始转换 PDF...")
 
-            # 临时文件
-            temp_path = "temp_converted.docx"
-
-            # 步骤 1: 转换 PDF
+            # 转换 PDF（直接输出到最终文件）
             sys.stdout = io.StringIO()
             sys.stderr = io.StringIO()
 
-            # converter = HybridConverter(
-            #     yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
-            #     unimernet_cfg_path="demo.yaml"
-            # )
+            converter = HybridConverter(
+                yolo_model_path="weights/doclayout_yolo_docstructbench_imgsz1024.pt",
+                unimernet_cfg_path="demo.yaml"
+            )
+            converter.convert(pdf_path=pdf_path, docx_path=output_path)
 
-            converter = Converter(pdf_path)
-
-            # converter.convert(pdf_path=pdf_path, docx_path=temp_path)
-            converter.convert(temp_path)
+            # converter = Converter(pdf_path)
+            # converter.convert(output_path)
 
             sys.stdout = old_stdout
             sys.stderr = old_stderr
 
             print_info("PDF 转换完成")
-            print_info("开始格式化文档...")
-
-            # 步骤 2: 格式化
-            sys.stdout = io.StringIO()
-            sys.stderr = io.StringIO()
-
-            format_english_body_text_improved(
-                input_path=temp_path,
-                output_path=output_path,
-                target_font='Times New Roman',
-                target_size=10.0,
-                target_alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
-            )
-
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
-
-            print_info("格式化完成")
-
-            # 清理临时文件
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
 
             print_save(output_path)
             return True

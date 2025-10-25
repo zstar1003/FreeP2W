@@ -1568,6 +1568,7 @@ class HybridConverter:
             yolo_rects = [fitz.Rect(fig['bbox']) for fig in yolo_figures]
 
             # Filter out text blocks that overlap with YOLO figure regions (but not formula regions)
+            # IMPROVED: Use higher threshold to preserve body text near figures
             filtered_blocks = []
             filtered_count = 0
             for block in text_blocks:
@@ -1580,7 +1581,10 @@ class HybridConverter:
                 overlaps_with_figure = False
                 for yolo_rect in yolo_rects:
                     overlap_ratio = _rect_overlap_ratio(block_bbox, yolo_rect)
-                    if overlap_ratio > 0.5:  # More than 50% overlap with figure
+                    # IMPROVED: Raised threshold from 0.5 to 0.85
+                    # Only filter text that's almost completely inside a figure
+                    # This preserves body text that's merely adjacent to figures
+                    if overlap_ratio > 0.85:  # More than 85% overlap with figure
                         overlaps_with_figure = True
                         filtered_count += 1
                         break
@@ -1695,7 +1699,8 @@ class HybridConverter:
                 overlaps = False
                 for yolo_rect in yolo_rects:
                     overlap_ratio = _rect_overlap_ratio(shape.bbox, yolo_rect)
-                    if overlap_ratio > 0.9:  # More than 90% overlap (changed from 50%)
+                    # IMPROVED: Keep at 90% for shapes (more conservative than text)
+                    if overlap_ratio > 0.9:  # More than 90% overlap
                         overlaps = True
                         filtered_count += 1
                         break
