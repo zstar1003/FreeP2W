@@ -1,9 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "FreeP2W"
-version = "0.1.0"
-description = "The best method for PDF to Word"
+name = "freep2w"
+version = "1.0.0"
+description = "Free PDF to Word Converter"
 readme = "README.md"
+authors = [
+    {name = "zstar", email = "zstar1003@163.com"}
+]
+license = {text = "MIT"}
 requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+keywords = ["pdf", "docx", "converter", "formula", "recognition", "yolo", "unimernet"]
 dependencies = [
     "fire==0.7.1",
     "fonttools==4.60.1",
@@ -29,7 +50,23 @@ dependencies = [
     "evaluate>=0.4.6",
     "rapidfuzz>=3.14.1",
     "pyinstaller>=6.16.0",
+    "twine>=6.2.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/zstar1003/FreeP2W"
+Documentation = "https://github.com/zstar1003/FreeP2W/wiki"
+Repository = "https://github.com/zstar1003/FreeP2W"
+"Bug Tracker" = "https://github.com/zstar1003/FreeP2W/issues"
+
+[project.scripts]
+freep2w = "freep2w.cli:main"
+
+[tool.setuptools]
+packages = ["freep2w"]
+
+[tool.setuptools.package-data]
+freep2w = ["weights/*.pt", "*.yaml"]
 
 [tool.uv.sources]
 torch = [

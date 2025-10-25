@@ -1,0 +1,14 @@
+# Include model files and configs
+include weights/*.pt
+include demo.yaml
+include requirements.txt
+include LICENSE
+include README.md
+
+# Exclude build artifacts
+exclude build_exe.bat
+exclude freep2w.bat
+exclude freep2w.spec
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store

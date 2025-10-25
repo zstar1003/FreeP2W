@@ -1,0 +1,140 @@
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.1
+aiosignal==1.4.0
+albucore==0.0.24
+albumentations==2.0.8
+altgraph==0.17.4
+annotated-types==0.7.0
+antlr4-python3-runtime==4.9.3
+anyio==4.11.0
+async-timeout==5.0.1 ; python_full_version < '3.11'
+attrs==25.4.0
+backports-tarfile==1.2.0 ; python_full_version < '3.12' and platform_machine != 'ppc64le' and platform_machine != 's390x'
+braceexpand==0.1.7
+certifi==2025.10.5
+cffi==2.0.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x' and platform_python_implementation != 'PyPy' and sys_platform == 'linux'
+charset-normalizer==3.4.4
+colorama==0.4.6 ; sys_platform == 'win32'
+contourpy==1.3.2 ; python_full_version < '3.11'
+contourpy==1.3.3 ; python_full_version >= '3.11'
+cryptography==46.0.3 ; platform_machine != 'ppc64le' and platform_machine != 's390x' and sys_platform == 'linux'
+cycler==0.12.1
+datasets==4.2.0
+dill==0.4.0
+docutils==0.22.2
+evaluate==0.4.6
+exceptiongroup==1.3.0 ; python_full_version < '3.11'
+fairscale==0.4.13
+filelock==3.20.0
+fire==0.7.1
+fonttools==4.60.1
+frozenlist==1.8.0
+fsspec==2025.9.0
+ftfy==6.3.1
+h11==0.16.0
+hf-xet==1.1.10 ; platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64'
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==0.35.3
+id==1.5.0
+idna==3.11
+importlib-metadata==8.7.0 ; python_full_version < '3.12' and platform_machine != 'ppc64le' and platform_machine != 's390x'
+iopath==0.1.10
+jaraco-classes==3.4.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
+jaraco-context==6.0.1 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
+jaraco-functools==4.3.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
+jeepney==0.9.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x' and sys_platform == 'linux'
+jinja2==3.1.6
+keyring==25.6.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
+kiwisolver==1.4.9
+lxml==6.0.2
+macholib==1.16.3 ; sys_platform == 'darwin'
+markdown-it-py==4.0.0
+markupsafe==3.0.3
+matplotlib==3.10.7
+mdurl==0.1.2
+more-itertools==10.8.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x'
+mpmath==1.3.0
+multidict==6.7.0
+multiprocess==0.70.16
+networkx==3.4.2 ; python_full_version < '3.11'
+networkx==3.5 ; python_full_version >= '3.11'
+nh3==0.3.1
+numpy==1.26.4
+nvidia-cublas-cu12==12.6.4.1 ; sys_platform == 'linux'
+nvidia-cuda-cupti-cu12==12.6.80 ; sys_platform == 'linux'
+nvidia-cuda-nvrtc-cu12==12.6.77 ; sys_platform == 'linux'
+nvidia-cuda-runtime-cu12==12.6.77 ; sys_platform == 'linux'
+nvidia-cudnn-cu12==9.10.2.21 ; sys_platform == 'linux'
+nvidia-cufft-cu12==11.3.0.4 ; sys_platform == 'linux'
+nvidia-cufile-cu12==1.11.1.6 ; sys_platform == 'linux'
+nvidia-curand-cu12==10.3.7.77 ; sys_platform == 'linux'
+nvidia-cusolver-cu12==11.7.1.2 ; sys_platform == 'linux'
+nvidia-cusparse-cu12==12.5.4.2 ; sys_platform == 'linux'
+nvidia-cusparselt-cu12==0.7.1 ; sys_platform == 'linux'
+nvidia-nccl-cu12==2.27.5 ; sys_platform == 'linux'
+nvidia-nvjitlink-cu12==12.6.85 ; sys_platform == 'linux'
+nvidia-nvshmem-cu12==3.3.20 ; sys_platform == 'linux'
+nvidia-nvtx-cu12==12.6.77 ; sys_platform == 'linux'
+omegaconf==2.3.0
+opencv-python-headless==4.11.0.86
+packaging==25.0
+pandas==2.3.3
+pefile==2023.2.7 ; sys_platform == 'win32'
+pillow==10.4.0
+portalocker==3.2.0
+propcache==0.4.1
+psutil==7.1.1
+pyarrow==21.0.0
+pycparser==2.23 ; implementation_name != 'PyPy' and platform_machine != 'ppc64le' and platform_machine != 's390x' and platform_python_implementation != 'PyPy' and sys_platform == 'linux'
+pydantic==2.12.3
+pydantic-core==2.41.4
+pygments==2.19.2
+pyinstaller==6.16.0
+pyinstaller-hooks-contrib==2025.9
+pymupdf==1.26.5
+pyparsing==3.2.5
+python-dateutil==2.9.0.post0
+python-docx==1.2.0
+pytz==2025.2
+pywin32==311 ; sys_platform == 'win32'
+pywin32-ctypes==0.2.3 ; sys_platform == 'win32'
+pyyaml==6.0.3
+rapidfuzz==3.14.1
+readme-renderer==44.0
+regex==2025.10.22
+requests==2.32.5
+requests-toolbelt==1.0.0
+rfc3986==2.0.0
+rich==14.2.0
+safetensors==0.6.2
+scipy==1.15.3 ; python_full_version < '3.11'
+scipy==1.16.2 ; python_full_version >= '3.11'
+secretstorage==3.4.0 ; platform_machine != 'ppc64le' and platform_machine != 's390x' and sys_platform == 'linux'
+setuptools==80.9.0
+simsimd==6.5.3
+six==1.17.0
+sniffio==1.3.1
+stringzilla==4.2.1
+sympy==1.14.0
+termcolor==3.1.0
+timm==1.0.20
+tokenizers==0.19.1
+torch==2.9.0 ; sys_platform != 'linux' and sys_platform != 'win32'
+torch==2.9.0+cu126 ; sys_platform == 'linux' or sys_platform == 'win32'
+torchvision==0.24.0 ; platform_machine == 'aarch64' and sys_platform == 'linux'
+torchvision==0.24.0 ; sys_platform != 'linux' and sys_platform != 'win32'
+torchvision==0.24.0+cu126 ; (platform_machine != 'aarch64' and sys_platform == 'linux') or sys_platform == 'win32'
+tqdm==4.67.1
+transformers==4.42.4
+triton==3.5.0 ; sys_platform == 'linux'
+twine==6.2.0
+typing-extensions==4.15.0
+typing-inspection==0.4.2
+tzdata==2025.2
+urllib3==2.5.0
+wcwidth==0.2.14
+webdataset==1.0.2
+xxhash==3.6.0
+yarl==1.22.0
+zipp==3.23.0 ; python_full_version < '3.12' and platform_machine != 'ppc64le' and platform_machine != 's390x'
