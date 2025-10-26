@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo.png" width="400" alt="FreeP2W">
+</div>
+
 <div align="center"> 
 <h4> 
 <a href="README.md">🇨🇳 Chinese</a> 

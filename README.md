@@ -1,10 +1,15 @@
 <div align="center">
+  <img src="assets/logo.png" width="400" alt="FreeP2W">
+</div>
+
+<div align="center">
   <h4>
     <a href="README.md">🇨🇳 中文</a>
     <span> | </span>
     <a href="README_EN.md">🇬🇧 English</a>
   </h4>
 </div>
+
 
 ## 简介
 
