@@ -49,6 +49,11 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
         output_path: 输出 DOCX 路径（可选）
     """
 
+    # Fail before model setup: invalid paths must not trigger large downloads.
+    if not os.path.isfile(pdf_path):
+        print(f"[错误] PDF 文件不存在或不是文件: {pdf_path}")
+        return False
+
     # 自动检查并下载模型
     yolo_path = None
     cfg_path = None
@@ -64,11 +69,6 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
         import traceback
         traceback.print_exc()
     
-    # 验证输入文件
-    if not os.path.exists(pdf_path):
-        print(f"[错误] PDF 文件不存在: {pdf_path}")
-        return False
-
     # 确定输出路径
     if output_path is None:
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
