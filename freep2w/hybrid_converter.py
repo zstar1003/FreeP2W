@@ -10,6 +10,7 @@ Strategy:
 """
 
 import os
+from contextlib import contextmanager, nullcontext
 import torch
 from doclayout_yolo import YOLOv10
 from pdf2docx import Converter
@@ -272,6 +273,8 @@ class HybridConverter:
             - yolo_imgsz: int (default 1024) - YOLO image size
             - ... (other pdf2docx parameters)
         """
+        # Page indices only identify regions within one conversion, not a document.
+        self.yolo_detector.detected_regions.clear()
         use_yolo = kwargs.pop('use_yolo_images', True)
 
         # Update YOLO parameters if provided
@@ -289,31 +292,23 @@ class HybridConverter:
         if use_yolo:
             # Pre-detect all figures and formulas with YOLO
             print("[YOLO] Pre-detecting figures and formulas in all pages...")
-            pdf_doc = fitz.open(pdf_path)
-
-            for page_num in range(len(pdf_doc)):
-                page = pdf_doc[page_num]
-                self.yolo_detector.detect_page_regions(page, page_num)
-
-            pdf_doc.close()
+            with fitz.open(pdf_path) as pdf_doc:
+                for page_num in range(len(pdf_doc)):
+                    page = pdf_doc[page_num]
+                    self.yolo_detector.detect_page_regions(page, page_num)
             print()
 
-            # Inject YOLO detector into pdf2docx
-            self._inject_yolo_to_pdf2docx(pdf_path)
-
-        # Convert with pdf2docx
-        print("[pdf2docx] Converting with pdf2docx...")
-        cv = Converter(pdf_path)
-
-        # Set default parameters for better quality
-        default_params = {
-            'start': 0,
-            'end': None,
-        }
-        default_params.update(kwargs)
-
-        cv.convert(docx_path, **default_params)
-        cv.close()
+        # Scope global pdf2docx hooks to this conversion, including failure paths.
+        hooks = self._inject_yolo_to_pdf2docx(pdf_path) if use_yolo else nullcontext()
+        with hooks:
+            print("[pdf2docx] Converting with pdf2docx...")
+            cv = Converter(pdf_path)
+            try:
+                default_params = {'start': 0, 'end': None}
+                default_params.update(kwargs)
+                cv.convert(docx_path, **default_params)
+            finally:
+                cv.close()
 
         # Insert formulas if any were detected
         if use_yolo:
@@ -1405,6 +1400,7 @@ class HybridConverter:
             traceback.print_exc()
             return None
 
+    @contextmanager
     def _inject_yolo_to_pdf2docx(self, pdf_path):
         """
         Inject YOLO detected regions into pdf2docx's image extraction
@@ -1745,7 +1741,14 @@ class HybridConverter:
         RawPageFitz._preprocess_text = yolo_filtered_preprocess_text
         Paths.restore = yolo_filtered_paths_restore
         Paths.to_shapes_and_images = yolo_filtered_to_shapes_and_images
-        # Shapes.restore = yolo_filtered_shapes_restore  # Disabled: may interfere with table parsing
+        # Shapes.restore stays unchanged: filtering may interfere with table parsing.
+        try:
+            yield
+        finally:
+            ImagesExtractor.extract_images = original_extract_images
+            RawPageFitz._preprocess_text = original_preprocess_text
+            Paths.restore = original_paths_restore
+            Paths.to_shapes_and_images = original_to_shapes_and_images
 
 
 def main():
