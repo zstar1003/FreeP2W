@@ -19,7 +19,7 @@ FreeP2W 是一款将 PDF 到 Word 转换工具，在 pdf2docx 的基础上，引
 
 ### 系统要求
 
-- Python 3.8 或更高版本
+- Python 3.10 或更高版本
 - Windows / Linux / macOS
 - 至少 4GB 可用磁盘空间（用于存储模型文件）
 

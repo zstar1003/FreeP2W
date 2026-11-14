@@ -18,7 +18,7 @@ FreeP2W This PDF to Word conversion tool leverages pdf2docx and incorporates Doc
 
 ### System Requirements
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Windows / Linux / macOS
 - At least 4GB of available disk space (for storing model files)
 
