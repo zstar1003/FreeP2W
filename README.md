@@ -92,6 +92,16 @@ freep2w [-h] [-o OUTPUT] [-v] input
   -v, --version         显示版本号
 ```
 
+### 输出文件安全
+
+默认不会覆盖已有输出文件。如需替换旧的 Word 文件，请显式使用 `--overwrite`：
+
+```bash
+freep2w input.pdf -o output.docx --overwrite
+```
+
+Python API 对应参数为 `convert_pdf_to_docx(..., overwrite=True)`。输入 PDF 本身及其软/硬链接始终禁止作为输出。转换先写入同目录临时文件，成功后才发布；失败时保留旧输出。默认的无覆盖发布要求目标文件系统支持硬链接，不支持时会安全失败，不会退回到覆盖写入。
+
 ### Python API
 
 ```python

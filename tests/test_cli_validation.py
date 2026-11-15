@@ -49,7 +49,12 @@ class CliValidationTests(unittest.TestCase):
                 self.assertTrue(cli.convert_pdf_to_docx(str(pdf), output))
             downloader.assert_called_once_with()
             converter.assert_called_once_with(yolo_model_path='model.pt', unimernet_cfg_path='demo.yaml')
-            converter.return_value.convert.assert_called_once_with(pdf_path=str(pdf), docx_path=output)
+            converter.return_value.convert.assert_called_once()
+            call = converter.return_value.convert.call_args.kwargs
+            self.assertEqual(call['pdf_path'], str(pdf))
+            self.assertNotEqual(call['docx_path'], output)
+            self.assertTrue(Path(output).is_file())
+            self.assertFalse(Path(call['docx_path']).exists())
 
 
 if __name__ == '__main__':
