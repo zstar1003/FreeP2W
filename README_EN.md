@@ -95,6 +95,16 @@ Output DOCX file path (optional)
 -v, --version displays the version number
 ```
 
+### Output safety
+
+Existing output files are preserved by default. To replace an old Word file explicitly:
+
+```bash
+freep2w input.pdf -o output.docx --overwrite
+```
+
+The Python API equivalent is `convert_pdf_to_docx(..., overwrite=True)`. The input PDF and its symbolic/hard links are never allowed as output. Conversion is staged in the destination directory and published only on success; failures preserve the old output. Default no-clobber publication requires hard-link support on the destination filesystem and fails safely if unsupported rather than falling back to an overwrite.
+
 ### Python API
 
 ```python

@@ -15,6 +15,8 @@ project_root = Path(__file__).parent.parent.absolute()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from freep2w.output_utils import safe_output, validate_output_path
+
 # 禁用所有警告
 warnings.filterwarnings('ignore')
 
@@ -40,7 +42,7 @@ def print_save(filepath):
     print(f"[保存] 已保存到: {filepath}")
 
 
-def convert_pdf_to_docx(pdf_path, output_path=None):
+def convert_pdf_to_docx(pdf_path, output_path=None, *, overwrite=False):
     """
     转换 PDF 到 DOCX
 
@@ -52,6 +54,16 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
     # Fail before model setup: invalid paths must not trigger large downloads.
     if not os.path.isfile(pdf_path):
         print(f"[错误] PDF 文件不存在或不是文件: {pdf_path}")
+        return False
+
+    # 确定输出路径
+    if output_path is None:
+        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+        output_path = f"{base_name}_converted.docx"
+    try:
+        validate_output_path(pdf_path, output_path, overwrite)
+    except (OSError, ValueError) as exc:
+        print(f"[错误] {exc}")
         return False
 
     # 自动检查并下载模型
@@ -69,10 +81,6 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
         import traceback
         traceback.print_exc()
     
-    # 确定输出路径
-    if output_path is None:
-        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
-        output_path = f"{base_name}_converted.docx"
 
     try:
         # 导入转换器（延迟导入以加快启动速度）
@@ -112,7 +120,8 @@ def convert_pdf_to_docx(pdf_path, output_path=None):
                     unimernet_cfg_path="demo.yaml"
                 )
 
-            converter.convert(pdf_path=pdf_path, docx_path=output_path)
+            with safe_output(pdf_path, output_path, overwrite) as staged_path:
+                converter.convert(pdf_path=pdf_path, docx_path=staged_path)
 
             # converter = Converter(pdf_path)
             # converter.convert(output_path)
@@ -153,12 +162,13 @@ def main():
 
     parser.add_argument('input', help='输入 PDF 文件路径')
     parser.add_argument('-o', '--output', help='输出 DOCX 文件路径（可选）')
+    parser.add_argument('--overwrite', action='store_true', help='替换已有输出文件（绝不覆盖输入 PDF）')
     parser.add_argument('-v', '--version', action='version', version='FreeP2W 1.0')
 
     args = parser.parse_args()
 
     # 执行转换
-    success = convert_pdf_to_docx(args.input, args.output)
+    success = convert_pdf_to_docx(args.input, args.output, overwrite=args.overwrite)
 
     if success:
         sys.exit(0)
